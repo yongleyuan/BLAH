@@ -241,7 +241,7 @@ def qstat(jobid=""):
         command += ('-1',)  # -1 conflicts with -f in PBS Pro
     if jobid:
         command += ('-x', jobid) if pbs_pro else (jobid,)
-    qstat_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    qstat_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
     qstat_out, _ = qstat_proc.communicate()
     result = parse_qstat(qstat_out)
     log("Finished qstat (time=%f)." % (time.time()-starttime))

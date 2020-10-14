@@ -241,7 +241,7 @@ def call_scontrol(jobid="", cluster=""):
         command = (scontrol, 'show', 'job')
     if jobid:
         command += (jobid,)
-    scontrol_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    scontrol_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
     scontrol_out, _ = scontrol_proc.communicate()
 
     result = parse_scontrol(scontrol_out)
