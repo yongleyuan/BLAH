@@ -369,7 +369,7 @@ def get_finished_job_stats(jobid, cluster):
                 else:
                     # The last value is not a letter (or unrecognized scaling factor), and is in bytes, convert to k
                     value = str(int(value) / 1024)
-                return_dict["ImageSize"] += int(value.strip('KMGTP')) * factor
+                return_dict["ImageSize"] += int(float(value.strip('KMGTP'))) * factor
             except:
                 log("Failed to parse memory usage for job id %s: %s" % (jobid, row["MaxRSS"]))
                 raise
