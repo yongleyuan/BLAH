@@ -241,8 +241,12 @@ def call_scontrol(jobid="", cluster=""):
         command = (scontrol, 'show', 'job')
     if jobid:
         command += (jobid,)
-    scontrol_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+    scontrol_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     scontrol_out, _ = scontrol_proc.communicate()
+
+    # In Python 3 subprocess.Popen opens streams as bytes so we need to decode them into str
+    if str is not bytes:
+        scontrol_out = scontrol_out.decode('latin-1', errors='strict')
 
     result = parse_scontrol(scontrol_out)
     log("Finished scontrol (time=%f)." % (time.time()-starttime))

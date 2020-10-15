@@ -241,8 +241,13 @@ def qstat(jobid=""):
         command += ('-1',)  # -1 conflicts with -f in PBS Pro
     if jobid:
         command += ('-x', jobid) if pbs_pro else (jobid,)
-    qstat_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+    qstat_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     qstat_out, _ = qstat_proc.communicate()
+
+    # In Python 3 subprocess.Popen opens streams as bytes so we need to decode them into str
+    if str is not bytes:
+        qstat_out = qstat_out.decode('latin-1', errors='strict')
+
     result = parse_qstat(qstat_out)
     log("Finished qstat (time=%f)." % (time.time()-starttime))
 
