@@ -358,7 +358,7 @@ def get_finished_job_stats(jobid):
                         factor = 1024 * 1024 * 1024
                     elif value[-1] == 'P':
                         factor = 1024 * 1024 * 1024 * 1024
-                        return_dict["ImageSize"] += int(float(value.strip('KMGTP'))) * factor
+                    return_dict["ImageSize"] += int(float(value.rstrip('KMGTP'))) * factor
                 except:
                     log("Failed to parse memory usage for job id %s: %s" % (jobid, row["MaxRSS"]))
                     raise
