@@ -594,6 +594,6 @@ if __name__ == "__main__":
         exc_traceback = sys.exc_info()[2]
         tb = traceback.extract_tb(exc_traceback)
         log(traceback.format_exc())
-        print("1ERROR: {0}: {1} (file {2}, line {3})".format(e.__class__.__name__, str(e),
+        print("1ERROR: {0}: {1} (file {2}, line {3})".format(e.__class__.__name__, str(e).replace("\n", "\\n"),
                                                              tb[-1].filename, tb[-1].lineno))
         sys.exit(0)
