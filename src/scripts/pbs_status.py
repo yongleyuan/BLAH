@@ -245,8 +245,8 @@ def qstat(jobid=""):
     qstat_out, _ = qstat_proc.communicate()
 
     # In Python 3 subprocess.Popen opens streams as bytes so we need to decode them into str
-    if str is not bytes:
-        qstat_out = qstat_out.decode('latin-1', errors='strict')
+    if qstat_out is not str:
+        qstat_out = qstat_out.decode('latin-1')
 
     result = parse_qstat(qstat_out)
     log("Finished qstat (time=%f)." % (time.time()-starttime))
