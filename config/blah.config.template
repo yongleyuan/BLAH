@@ -102,6 +102,9 @@ pbs_set_pvmem=no
 #Set to 'yes' if you are running PBS Pro
 pbs_pro=no
 
+#Set to 'yes' if you are running PBS with the Maui scheduler
+pbs_maui=no
+
 ##LSF common variables
 
 #Path where LSF executables are located 

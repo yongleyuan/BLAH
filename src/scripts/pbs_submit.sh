@@ -155,11 +155,10 @@ bls_set_up_local_and_extra_args
 [ -z "$bls_opt_queue" ] || grep -q "^#PBS -q" $bls_tmp_file || echo "#PBS -q $bls_opt_queue" >> $bls_tmp_file
 
 # Extended support for MPI attributes (+GPU for pbs_sched)
-pmaui=$(/usr/bin/pgrep maui)
 if [ "x$pbs_pro" == "xyes" ]; then
     pbs_select="$pbs_select:ncpus=$bls_opt_smpgranularity"
 else
-    if [[ -z "$pmaui" && ! -z "$bls_opt_gpunumber" ]] ; then
+    if [[ "$pbs_maui" == "yes" && ! -z "$bls_opt_gpunumber" ]] ; then
         if [[ ! -z "$bls_opt_gpumode" ]] ; then
 	    gpu_arg=":gpus=$bls_opt_gpunumber:$bls_opt_gpumode"
 	else
@@ -210,7 +209,7 @@ fi
 # --- End of MPI directives (+GPU for pbs_sched)
 
 # --- Begin of GPU directives (for Maui)
-if [ ! -z $pmaui ] ; then
+if [ "$pbs_maui" == "yes" ] ; then
     if [ ! -z $bls_opt_gpunumber ] && [ $bls_opt_gpunumber -gt 0 ] ; then
         echo "#PBS -W x='GRES:gpu@$bls_opt_gpunumber'" >> $bls_tmp_file
     fi
