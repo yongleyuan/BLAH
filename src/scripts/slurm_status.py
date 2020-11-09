@@ -244,6 +244,10 @@ def call_scontrol(jobid="", cluster=""):
     scontrol_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     scontrol_out, _ = scontrol_proc.communicate()
 
+    # In Python 3 subprocess.Popen opens streams as bytes so we need to decode them into str
+    if scontrol_out is not str:
+        scontrol_out = scontrol_out.decode('latin-1')
+
     result = parse_scontrol(scontrol_out)
     log("Finished scontrol (time=%f)." % (time.time()-starttime))
 
@@ -369,7 +373,7 @@ def get_finished_job_stats(jobid, cluster):
                 else:
                     # The last value is not a letter (or unrecognized scaling factor), and is in bytes, convert to k
                     value = str(int(value) / 1024)
-                return_dict["ImageSize"] += int(value.strip('KMGTP')) * factor
+                return_dict["ImageSize"] += int(float(value.strip('KMGTP'))) * factor
             except:
                 log("Failed to parse memory usage for job id %s: %s" % (jobid, row["MaxRSS"]))
                 raise
@@ -591,6 +595,9 @@ if __name__ == "__main__":
     except SystemExit:
         raise
     except Exception as e:
+        exc_traceback = sys.exc_info()[2]
+        tb = traceback.extract_tb(exc_traceback)
         log(traceback.format_exc())
-        print("1ERROR: %s" % str(e).replace("\n", "\\n"))
+        print("1ERROR: {0}: {1} (file {2}, line {3})".format(e.__class__.__name__, str(e).replace("\n", "\\n"),
+                                                             tb[-1].filename, tb[-1].lineno))
         sys.exit(0)

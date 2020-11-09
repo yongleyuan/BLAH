@@ -243,6 +243,11 @@ def qstat(jobid=""):
         command += ('-x', jobid) if pbs_pro else (jobid,)
     qstat_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     qstat_out, _ = qstat_proc.communicate()
+
+    # In Python 3 subprocess.Popen opens streams as bytes so we need to decode them into str
+    if qstat_out is not str:
+        qstat_out = qstat_out.decode('latin-1')
+
     result = parse_qstat(qstat_out)
     log("Finished qstat (time=%f)." % (time.time()-starttime))
 
@@ -358,7 +363,7 @@ def get_finished_job_stats(jobid):
                         factor = 1024 * 1024 * 1024
                     elif value[-1] == 'P':
                         factor = 1024 * 1024 * 1024 * 1024
-                        return_dict["ImageSize"] += int(value.strip('KMGTP')) * factor
+                    return_dict["ImageSize"] += int(float(value.rstrip('KMGTP'))) * factor
                 except:
                     log("Failed to parse memory usage for job id %s: %s" % (jobid, row["MaxRSS"]))
                     raise
@@ -591,6 +596,9 @@ if __name__ == "__main__":
     except SystemExit:
         raise
     except Exception as e:
+        exc_traceback = sys.exc_info()[2]
+        tb = traceback.extract_tb(exc_traceback)
         log(traceback.format_exc())
-        print("1ERROR: %s" % str(e).replace("\n", "\\n"))
+        print("1ERROR: {0}: {1} (file {2}, line {3})".format(e.__class__.__name__, str(e).replace("\n", "\\n"),
+                                                             tb[-1].filename, tb[-1].lineno))
         sys.exit(0)
