@@ -23,12 +23,11 @@ wletcwm_DATA = blah.config.template blparser.conf.template
 
 EXTRA_DIST = blah.config.template \
              blparser.conf.template \
-             glite-ce-blah-parser \
-             glite-ce-check-blparser 
+             glite-ce-blah-parser
 
 initdir = rc.d/init.d
 bldir = $(sysconfdir)/$(initdir)
-bl_SCRIPTS = glite-ce-blah-parser glite-ce-check-blparser
+bl_SCRIPTS = glite-ce-blah-parser
 
 CLEANFILES =
 

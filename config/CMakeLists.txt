@@ -22,7 +22,6 @@ install(FILES
 
 install(FILES 
     glite-ce-blah-parser
-    glite-ce-check-blparser
     PERMISSIONS OWNER_WRITE OWNER_READ OWNER_EXECUTE
                 GROUP_READ GROUP_EXECUTE
                 WORLD_READ WORLD_EXECUTE

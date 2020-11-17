@@ -114,7 +114,6 @@ Files: ./bootstrap
  ./config/glite-ce-blah-parser
  ./config/glite-ce-blahparser
  ./config/glite-ce-blparser
- ./config/glite-ce-check-blparser
  ./project/glite-ce-blahp.post
  ./project/glite-ce-blahp.preun
  ./src/BPRclient.c
