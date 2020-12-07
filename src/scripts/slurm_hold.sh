@@ -31,7 +31,7 @@ fi
 requested=`echo $1 | sed 's/^.*\///'`
 
 cluster_name=`echo $requested | cut -s -f2 -d@`
-if [ $cluster_name != "" ] ; then
+if [ "$cluster_name" != "" ] ; then
   requested=`echo $requested | cut -f1 -d@`
   cluster_arg="-M $cluster_name"
 fi

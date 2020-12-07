@@ -54,7 +54,7 @@ for  reqfull in $pars ; do
   reqjob=`echo $reqfull | sed -e 's/^.*\///'`
 
   cluster_name=`echo $reqjob | cut -s -f2 -d@`
-  if [ $cluster_name != "" ] ; then
+  if [ "$cluster_name" != "" ] ; then
     reqjob=`echo $reqjob | cut -f1 -d@`
     cluster_arg="-M $cluster_name"
   fi
