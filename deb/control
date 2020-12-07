@@ -1,27 +1,29 @@
 Source: blahp
 Section: science
-Priority: extra
+Priority: optional
 Maintainer: Tim Theisen <tim@cs.wisc.edu>
 Build-Depends: debhelper (>=9),
                automake,
                autoconf,
-               g++,
+               docbook-xsl,
                libtool,
-               make,
                libclassad-dev,
                libglobus-gss-assist-dev,
+               libglobus-gsi-cert-utils-dev,
                libglobus-gsi-credential-dev,
                libglobus-gsi-proxy-core-dev,
-               libglobus-gsi-cert-utils-dev,
-               docbook-xsl, libxslt1.1,
+               libxslt1.1,
+               python3,
                xsltproc
 Standards-Version: 3.9.8
 Homepage: https://github.com/htcondor/BLAH
+# Generate source tarball with:
+# git archive --prefix=blahp-1.18.48/ --out ../blahp_1.18.48.orig.tar.gz v1.18.48
 
 Package: blahp
 Architecture: any
 Multi-Arch: foreign
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, ${python3:Depends}, python3
 Description: gLite BLAHP daemon
  The Batch Local ASCII Helper Protocol daemon locally transfers jobs to
  a 3rd party batch system and controls them.

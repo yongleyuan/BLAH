@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@
+	dh $@ --with python3
 
 override_dh_auto_configure:
 	./bootstrap
@@ -11,6 +11,7 @@ override_dh_auto_configure:
 
 override_dh_auto_install:
 	dh_auto_install
+	rm -rf debian/blahp/etc/rc.d
 	mkdir --mode 0755 blahp
 	mv debian/blahp/usr/libexec/* blahp
 	mv blahp debian/blahp/usr/libexec
