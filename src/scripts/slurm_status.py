@@ -467,7 +467,7 @@ def fill_cache(cache_location, cluster):
         try:
             for key, val in results.items():
                 key = key.split(".")[0]
-                writer.writerow([key, pickle.dumps(val)])
+                writer.writerow([key, pickle.dumps(val).hex()])
             os.fsync(fd)
         except:
             os.unlink(filename)
@@ -484,7 +484,7 @@ def cache_to_status(jobid, fd):
     reader = csv.reader(fd, delimiter='\t')
     for row in reader:
         if row[0] == jobid:
-            return pickle.loads(row[1])
+            return pickle.loads(bytes.fromhex(row[1]))
 
 def check_cache(jobid, cluster, recurse=True):
     uid = os.geteuid()
@@ -504,7 +504,7 @@ def check_cache(jobid, cluster, recurse=True):
     if cluster != "":
         cache_location += "-%s" % cluster
     try:
-        fd = open(cache_location, "a+")
+        fd = open(cache_location, "r+")
     except IOError as ie:
         if ie.errno != 2:
             raise
