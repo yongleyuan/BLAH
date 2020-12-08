@@ -255,13 +255,13 @@ def call_squeue(jobid="", cluster=""):
 
     if squeue_proc.returncode == 0:
         result = parse_squeue(squeue_out)
-    elif squeue_proc.returncode == 1 and jobid: # Completed
+    if jobid and (squeue_proc.returncode == 1 or squeue_proc.returncode == 0 and jobid not in result): # Completed
         result = {jobid: {'BatchJobId': '"%s"' % jobid, "JobStatus": "4", "ExitCode": ' 0'}}
     elif squeue_proc.returncode != 0:
         raise Exception("squeue failed with exit code %s" % str(squeue_proc.returncode))
 
     # If the job has completed...
-    if jobid is not "" and "JobStatus" in result[jobid] and (result[jobid]["JobStatus"] == '4' or result[jobid]["JobStatus"] == '3'):
+    if jobid is not "" and jobid in result and "JobStatus" in result[jobid] and (result[jobid]["JobStatus"] == '4' or result[jobid]["JobStatus"] == '3'):
         # Get the finished job stats and update the result
         finished_job_stats = get_finished_job_stats(jobid, cluster)
         result[jobid].update(finished_job_stats)
