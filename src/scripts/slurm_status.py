@@ -560,7 +560,8 @@ def main():
     config = blah.BlahConfigParser(defaults={'slurm_binpath': '/usr/bin'})
 
     log("Checking cache for jobid %s" % jobid)
-    log("Job in in remote cluster %s" % cluster)
+    if cluster != "":
+        log("Job in remote cluster %s" % cluster)
     cache_contents = None
     try:
         cache_contents = check_cache(jobid, cluster)
