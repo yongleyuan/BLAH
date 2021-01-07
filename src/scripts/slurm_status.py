@@ -224,42 +224,44 @@ def get_pid_age(pid):
     st = os.stat("/proc/%d" % pid)
     return now - st.st_ctime
 
-def call_scontrol(jobid="", cluster=""):
+def call_squeue(jobid="", cluster=""):
     """
-    Call scontrol directly for a jobid.
+    Call squeue directly for a jobid.
     If none is specified, query all jobid's.
 
     Returns a python dictionary with the job info.
     """
-    scontrol = get_slurm_location('scontrol')
+    squeue = get_slurm_location('squeue')
 
     starttime = time.time()
-    log("Starting scontrol.")
+    log("Starting squeue.")
+    command = (squeue, '-o', '%i %T')
     if cluster:
-        command = (scontrol, '-M', cluster, 'show', 'job')
-    else:
-        command = (scontrol, 'show', 'job')
+        command += ('-M', cluster)
     if jobid:
-        command += (jobid,)
-    scontrol_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    scontrol_out, _ = scontrol_proc.communicate()
+        command += ('-j', jobid)
+    else:
+        uid = os.geteuid()
+        username = pwd.getpwuid(uid).pw_name
+        command += ('-u', username)
+    squeue_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    squeue_out, _ = squeue_proc.communicate()
 
     # In Python 3 subprocess.Popen opens streams as bytes so we need to decode them into str
     if scontrol_out is not str:
-        scontrol_out = scontrol_out.decode('latin-1')
+        squeue_out = squeue_out.decode('latin-1')
 
-    result = parse_scontrol(scontrol_out)
-    log("Finished scontrol (time=%f)." % (time.time()-starttime))
+    log("Finished squeue (time=%f)." % (time.time()-starttime))
 
-    if scontrol_proc.returncode == 1: # Completed
+    if squeue_proc.returncode == 0:
+        result = parse_squeue(squeue_out)
+    if jobid and (squeue_proc.returncode == 1 or squeue_proc.returncode == 0 and jobid not in result): # Completed
         result = {jobid: {'BatchJobId': '"%s"' % jobid, "JobStatus": "4", "ExitCode": ' 0'}}
-    elif scontrol_proc.returncode == 271: # Removed
-        result = {jobid: {'BatchJobId': '"%s"' % jobid, 'JobStatus': '3', 'ExitCode': ' 0'}}
-    elif scontrol_proc.returncode != 0:
-        raise Exception("scontrol failed with exit code %s" % str(scontrol_proc.returncode))
+    elif squeue_proc.returncode != 0:
+        raise Exception("squeue failed with exit code %s" % str(squeue_proc.returncode))
 
     # If the job has completed...
-    if jobid is not "" and "JobStatus" in result[jobid] and (result[jobid]["JobStatus"] == '4' or result[jobid]["JobStatus"] == '3'):
+    if jobid is not "" and jobid in result and "JobStatus" in result[jobid] and (result[jobid]["JobStatus"] == '4' or result[jobid]["JobStatus"] == '3'):
         # Get the finished job stats and update the result
         finished_job_stats = get_finished_job_stats(jobid, cluster)
         result[jobid].update(finished_job_stats)
@@ -413,40 +415,25 @@ status_re = re.compile("\s*JobState=([\w]+) .*")
 exit_status_re = re.compile(".* ExitCode=(-?[0-9]+:[0-9]+)")
 status_mapping = {"BOOT_FAIL": 4, "CANCELLED": 3, "COMPLETED": 4, "CONFIGURING": 1, "COMPLETING": 2, "FAILED": 4, "NODE_FAIL": 4, "PENDING": 1, "PREEMPTED": 4, "RUNNING": 2, "SPECIAL_EXIT": 4, "STOPPED": 2, "SUSPENDED": 2, "TIMEOUT": 4}
 
-def parse_scontrol(output):
+def parse_squeue(output):
     """
-    Parse the stdout of "scontrol show job" into a python dictionary
+    Parse the stdout of "squeue -o '%i %T'" into a python dictionary
     containing the information we need.
     """
     job_info = {}
     cur_job_id = None
-    cur_job_info = {}
     for line in output.split('\n'):
         line = line.strip()
-        m = job_id_re.match(line)
-        if m:
-            if cur_job_id:
-                job_info[cur_job_id] = cur_job_info
-            cur_job_id = m.group(1)
-            #print cur_job_id, line
-            cur_job_info = {"BatchJobId": '"%s"' % cur_job_id}
+        fields = line.split(' ')
+        if len(fields) < 2 or fields[0] == "JOBID":
             continue
-        if cur_job_id is None:
-            continue
-        m = exec_host_re.match(line)
-        if m:
-            cur_job_info["WorkerNode"] = '"' + m.group(1) + '"'
-            continue
-        m = status_re.match(line)
-        if m:
-            status = status_mapping.get(m.group(1), 0)
-            if status != 0:
-                cur_job_info["JobStatus"] = str(status)
-            continue
-        m = exit_status_re.match(line)
-        if m:
-            cur_job_info["ExitCode"] = ' %s' % m.group(1).split(":")[0]
-            continue
+        cur_job_id = fields[0];
+        cur_job_info = {}
+        job_info[cur_job_id] = cur_job_info
+        cur_job_info["BatchJobId"] = cur_job_id
+        status = status_mapping.get(fields[1], 0)
+        if status != 0:
+            cur_job_info["JobStatus"] = str(status)
     if cur_job_id:
         job_info[cur_job_id] = cur_job_info
     return job_info
@@ -457,7 +444,7 @@ def job_dict_to_string(info):
 
 def fill_cache(cache_location, cluster):
     log("Starting query to fill cache.")
-    results = call_scontrol("", cluster)
+    results = call_squeue("", cluster)
     log("Finished query to fill cache.")
     (fd, filename) = tempfile.mkstemp(dir = "/var/tmp")
     # Open the file with a proper python file object
@@ -571,7 +558,7 @@ def main():
         #print msg
     if not cache_contents:
         log("Jobid %s not in cache; querying SLURM" % jobid)
-        results = call_scontrol(jobid, cluster)
+        results = call_squeue(jobid, cluster)
         log("Finished querying SLURM for jobid %s" % jobid)
         if not results or jobid not in results:
             log("1ERROR: Unable to find job %s" % jobid)
