@@ -117,8 +117,9 @@ if [ "$retcode" != "0" ] ; then
 	exit 1
 fi
 
-# The job id is actually the first numbers in the string (slurm support)
-jobID=`echo $jobID | awk 'match($0,/[0-9]+/){print substr($0, RSTART, RLENGTH)}'`
+# The job id is given by the line "Submitted batch job ###".
+# Some installations print additional lines before or after this one.
+jobID=`echo "$jobID" | awk 'match($0,/^Submitted batch job [0-9]+/){print $4}'`
 if [ "X$jobID" == "X" ]; then
 	rm -f $bls_tmp_file
 	echo "Error: job id missing" >&2
