@@ -119,7 +119,7 @@ fi
 
 # The job id is given by the line "Submitted batch job ###".
 # Some installations print additional lines before or after this one.
-jobID=`echo "$jobID" | awk 'match($0,/^Submitted batch job [0-9]+/){print $4}'`
+jobID=`echo "$jobID" | awk '/^Submitted batch job [0-9]+/ {print $4}'`
 if [ "X$jobID" == "X" ]; then
 	rm -f $bls_tmp_file
 	echo "Error: job id missing" >&2
