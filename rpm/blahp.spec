@@ -73,7 +73,7 @@ done
 
 # Create local_submit_attributes.sh symlinks in /etc/blahp
 for batch_system in pbs sge slurm lsf condor; do
-    ln -s %{bl_sysconfdir}/${batch_system}_local_submit_attributes.sh \
+    ln -s ../../../%{bl_sysconfdir}/${batch_system}_local_submit_attributes.sh \
        $RPM_BUILD_ROOT%{bl_libexecdir}/${batch_system}_local_submit_attributes.sh
 done
 
