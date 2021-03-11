@@ -40,6 +40,16 @@ def log(msg):
     """
     print(time.strftime("%x %X"), os.getpid(), msg, file=sys.stderr)
 
+def to_str(strlike, encoding="latin-1", errors="strict"):
+    """Turns a bytes into a str or leaves it alone.
+    The default encoding is latin-1 (which will not raise
+    a UnicodeDecodeError); best to use when you want to treat the data
+    as arbitrary bytes, but some function is expecting a str.
+    """
+    if isinstance(strlike, bytes):
+        return strlike.decode(encoding, errors)
+    return strlike
+
 def createCacheDir():
     uid = os.geteuid()
     username = pwd.getpwuid(uid).pw_name
@@ -216,6 +226,7 @@ def bjobs(jobid=""):
     command = (bjobs, '-V')
     bjobs_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     bjobs_version, _ = bjobs_process.communicate()
+    bjobs_version = to_str(bjobs_version)
     log(bjobs_version)
 
     starttime = time.time()
@@ -227,6 +238,8 @@ def bjobs(jobid=""):
         bjobs_process = subprocess.Popen(("%s -UF -a" % bjobs), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, shell=True)
 
     bjobs_process_stdout, bjobs_process_stderr = bjobs_process.communicate()
+    bjobs_process_stdout = to_str(bjobs_process_stdout)
+    bjobs_process_stderr = to_str(bjobs_process_stderr)
 
     if bjobs_process_stderr is "":
         result = parse_bjobs_fd(bjobs_process_stdout.splitlines())
@@ -308,6 +321,7 @@ def get_finished_job_stats(jobid):
         log("Querying bjobs for completed job for jobid: %s" % (str(jobid)))
         bhist_process = subprocess.Popen(("bhist -UF %s" % str(jobid)), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, shell=True)
         bhist_process_stdout, _ = bhist_process.communicate()
+        bhist_process_stdout = to_str(bhist_process_stdout)
 
         for line in bhist_process_stdout.splitlines():
             line = line.strip()
@@ -354,6 +368,7 @@ def get_bjobs_location():
         cmd = 'which bjobs'
     child_stdout = os.popen(cmd)
     output = child_stdout.read()
+    output = to_str(output)
     location = output.split("\n")[0].strip()
     if child_stdout.close():
         raise Exception("Unable to determine bjobs location: %s" % output)
