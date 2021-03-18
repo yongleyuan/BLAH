@@ -372,7 +372,7 @@ def get_finished_job_stats(jobid):
                     factor = 1024**4
                 elif mem_unit[0] == 'E':
                     factor = 1024**5
-                return_dict["ImageSize"] += int(float(value.rstrip('KMGTP'))) * factor
+                return_dict["ImageSize"] = int(float(m.group(1))) * factor
 
     return return_dict
 
