@@ -4,7 +4,24 @@
 #
 #  Author:   George Papadimitriou
 #  e-mail:   georgpap@isi.edu
+#  Author:   Brian Bockelman
+#  e-mail:   bbockelm@cse.unl.edu
 #
+#
+# Copyright (c) University of Nebraska-Lincoln.  2012
+# Copyright (c) University of Wisconsin-Madison.  2012
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
 """
@@ -13,6 +30,8 @@ Query LSF for the status of a given job
 Internally, it creates a cache of the LSF bjobs response and will reuse this
 for subsequent queries.
 """
+
+from __future__ import print_function
 
 import os
 import re
@@ -26,8 +45,12 @@ import struct
 import subprocess
 import signal
 import tempfile
+import traceback
 import pickle
 import csv
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import blah
 
 cache_timeout = 60
 
@@ -349,7 +372,7 @@ def get_finished_job_stats(jobid):
                     factor = 1024**4
                 elif mem_unit[0] == 'E':
                     factor = 1024**5
-                return_dict["ImageSize"] = int(m.group(1)) * factor
+                return_dict["ImageSize"] += int(float(value.rstrip('KMGTP'))) * factor
 
     return return_dict
 
@@ -444,7 +467,7 @@ def fill_cache(cache_location):
         try:
             for key, val in results.items():
                 key = key.split(".")[0]
-                writer.writerow([key, pickle.dumps(val)])
+                writer.writerow([key, pickle.dumps(val).hex()])
             os.fsync(fd)
         except:
             os.unlink(filename)
@@ -476,7 +499,7 @@ def cache_to_status(jobid, fd):
     reader = csv.reader(fd, delimiter='\t')
     for row in reader:
         if row[0] == jobid:
-            return pickle.loads(row[1])
+            return pickle.loads(bytes.fromhex(row[1]))
 
 def check_cache(jobid, recurse=True):
     uid = os.geteuid()
@@ -494,7 +517,7 @@ def check_cache(jobid, recurse=True):
             raise Exception("Unable to check cache because it is owned by UID %d" % s.st_uid)
     cache_location = os.path.join(cache_dir, "blahp_results_cache")
     try:
-        fd = open(cache_location, "a+")
+        fd = open(cache_location, "r+")
     except IOError as ie:
         if ie.errno != 2:
             raise
@@ -545,7 +568,7 @@ def main():
     except Exception as e:
         msg = "1ERROR: Internal exception, %s" % str(e)
         log(msg)
-        print(msg)
+        #print msg
     if not cache_contents:
         log("Jobid %s not in cache; querying LSF" % jobid)
         results = bjobs(jobid)
@@ -573,5 +596,9 @@ if __name__ == "__main__":
     except SystemExit:
         raise
     except Exception as e:
-        print("1ERROR: {}".format(str(e).replace("\n", "\\n")))
+        exc_traceback = sys.exc_info()[2]
+        tb = traceback.extract_tb(exc_traceback)
+        log(traceback.format_exc())
+        print("1ERROR: {0}: {1} (file {2}, line {3})".format(e.__class__.__name__, str(e).replace("\n", "\\n"),
+                                                             tb[-1].filename, tb[-1].lineno))
         sys.exit(0)
