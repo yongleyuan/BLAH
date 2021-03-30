@@ -248,7 +248,7 @@ def call_squeue(jobid="", cluster=""):
     squeue_out, _ = squeue_proc.communicate()
 
     # In Python 3 subprocess.Popen opens streams as bytes so we need to decode them into str
-    if scontrol_out is not str:
+    if squeue_out is not str:
         squeue_out = squeue_out.decode('latin-1')
 
     log("Finished squeue (time=%f)." % (time.time()-starttime))
