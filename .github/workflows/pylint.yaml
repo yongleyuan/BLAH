@@ -25,4 +25,4 @@ jobs:
         pip --cache-dir ~/pip-cache install pylint
     - name: Run Pylint
       run: |
-        cd ./src/scripts/ && pylint --errors-only .
+        cd ./src/scripts/ && pylint --errors-only scripts
