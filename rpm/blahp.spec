@@ -4,8 +4,8 @@
 %define bl_libexecdir %{_libexecdir}/%{name}
 
 Name:		blahp
-Version:	1.18.48
-Release:	2%{?gitrev:.%{gitrev}}%{?dist}
+Version:	2.0.0
+Release:	1%{?gitrev:.%{gitrev}}%{?dist}
 Summary:	gLite BLAHP daemon
 
 Group:		System/Libraries
@@ -106,6 +106,16 @@ fi
 %{_initrddir}/glite-ce-*
 
 %changelog
+* Tue Mar 30 2021 Brian Lin <blin@cs.wisc.edu> 2.0.0-1
+- Add GPU support (#12)
+- Improve multi-node support for Slurm (HTCONDOR-166)
+- More efficient status queries for Slurm (HTCONDOR-104)
+- More robust job ID extraction from SLurm (HTCONDOR-259)
+- Better interfacing with PBS and Slurm
+- More Python 3 fixes for PBS and Slurm scripts
+- Convert LSF script to Python 3 (HTCONDOR-333, #34)
+- Add Debian build files
+
 * Tue Sep 15 2020 Brian Lin <blin@cs.wisc.edu> - 1.18.48-2
 - Update RPM packaging
 
