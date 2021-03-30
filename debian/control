@@ -21,7 +21,7 @@ Build-Depends: debhelper (>=9),
 Standards-Version: 3.9.8
 Homepage: https://github.com/htcondor/BLAH
 # Generate source tarball with:
-# git archive --prefix=blahp-1.18.48/ --out ../blahp_1.18.48.orig.tar.gz v1.18.48
+# git archive --prefix=blahp-2.0.0/ --out ../blahp_2.0.0.orig.tar.gz v2.0.0
 
 Package: blahp
 Architecture: any
