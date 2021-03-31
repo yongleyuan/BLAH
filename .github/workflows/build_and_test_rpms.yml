@@ -1,0 +1,77 @@
+name: Build and test blahp RPMs
+on: [pull_request, push]
+
+jobs:
+  build-rpms-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dver: [7]
+        target_env: [osg]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Prepare Docker
+        run: |
+          echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null &&
+            sudo service docker restart
+
+      - name: Start CentOS ${{ matrix.dver}} image
+        run: |
+          docker run --privileged --detach --env "container=docker" \
+                 --name $GITHUB_SHA \
+                 --volume /sys/fs/cgroup:/sys/fs/cgroup \
+                 --volume `pwd`:/blahp:rw \
+                 centos:centos${{ matrix.dver }} \
+                 /usr/sbin/init
+
+      - name: Build EL${{ matrix.dver }} RPMs (${{ matrix.target_env }})
+        run: |
+          docker exec $GITHUB_SHA \
+                 /bin/bash -xc \
+                   "/blahp/tests/build_rpms.sh \
+                     ${{ matrix.dver }} \
+                     ${{ matrix.target_env}}"
+
+      - name: Install EL${{ matrix.dver }} RPMs (${{ matrix.target_env }})
+        run: |
+          docker exec $GITHUB_SHA \
+                 /bin/bash -xc \
+                   "/blahp/tests/install_rpms.sh \
+                     ${{ matrix.target_env}}"
+
+      - name: Run ${{ matrix.target_env }} integration tests (EL${{ matrix.dver }})
+        id: integration-tests
+        run: |
+          docker exec $GITHUB_SHA \
+                 /bin/bash -xc \
+                   "/blahp/tests/test_inside_docker.sh \
+                     ${{ matrix.dver}} \
+                     ${{ matrix.target_env}}"
+
+      - name: Host certificate details
+        if: failure() && steps.integration-tests.outcome == 'failure'
+        run: |
+          docker exec $GITHUB_SHA \
+                 openssl x509 -in /etc/grid-security/hostcert.pem -noout -text
+
+      - name: HTCondor configuration details
+        if: failure() && steps.integration-tests.outcome == 'failure'
+        run: |
+          docker exec $GITHUB_SHA \
+                 condor_config_val -dump
+
+      - name: HTCondor-CE logs
+        if: failure() && steps.integration-tests.outcome == 'failure'
+        run: |
+          docker exec $GITHUB_SHA \
+                 /bin/bash -c "cat /var/log/condor-ce/*"
+
+      - name: Verify preun/postun RPM sections
+        run: |
+          docker exec $GITHUB_SHA \
+                 yum remove -y 'blahp'
+
