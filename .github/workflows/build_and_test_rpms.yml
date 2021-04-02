@@ -77,6 +77,12 @@ jobs:
           docker exec $GITHUB_SHA \
                  /bin/bash -c "cat /var/log/condor-ce/*"
 
+      - name: HTCondor logs
+        if: failure() && steps.integration-tests.outcome == 'failure'
+        run: |
+          docker exec $GITHUB_SHA \
+                 /bin/bash -c "cat /var/log/condor/*"
+
       - name: Verify preun/postun RPM sections
         run: |
           docker exec $GITHUB_SHA \
