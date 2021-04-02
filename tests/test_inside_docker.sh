@@ -15,14 +15,6 @@ git rev-parse HEAD
 make install
 popd
 
-# HTCondor really, really wants a domain name.  Fake one.
-# PBS/Slurm really, really don't like hostnames starting with a digit
-sed /etc/hosts -e "s/`hostname`/gha-`hostname`.htcondor.org gha-`hostname`/" > /etc/hosts.new
-/bin/cp -f /etc/hosts.new /etc/hosts
-hostname
-hostname -s
-python -c 'import socket; print socket.gethostbyaddr(socket.gethostname())[0]; print socket.gethostname()'
-
 # Bind on the right interface and skip hostname checks.
 cat << EOF > /etc/condor/config.d/99-local.conf
 NETWORK_INTERFACE=eth0
