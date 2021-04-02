@@ -28,6 +28,8 @@ BuildRequires:  globus-gsi-proxy-core-devel
 BuildRequires:  globus-gsi-cert-utils-devel
 BuildRequires:  docbook-style-xsl, libxslt
 
+Requires:       python3
+
 %description
 %{summary}
 
@@ -35,10 +37,6 @@ BuildRequires:  docbook-style-xsl, libxslt
 %setup
 
 %build
-%if 0%{?rhel} == 7
-# Python 3 may not be installed on EL7
-sed -i 's;/usr/bin/python3;/usr/bin/python2;' src/scripts/*status.py
-%endif
 ./bootstrap
 export CPPFLAGS="-I/usr/include/classad -std=c++11 -fcommon"
 export LDFLAGS="-lclassad -lglobus_gsi_credential -lglobus_common -lglobus_gsi_proxy_core"
