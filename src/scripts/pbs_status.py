@@ -28,8 +28,6 @@ Internally, it creates a cache of the PBS qstat response and will reuse this
 for subsequent queries.
 """
 
-from __future__ import print_function
-
 import os
 import re
 import pwd

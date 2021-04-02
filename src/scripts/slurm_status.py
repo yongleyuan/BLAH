@@ -28,8 +28,6 @@ Internally, it creates a cache of the SLURM response for all jobs and
 will reuse this for subsequent queries.
 """
 
-from __future__ import print_function
-
 import os
 import re
 import pwd
