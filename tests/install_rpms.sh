@@ -17,6 +17,7 @@ yum localinstall -y $RPM_LOCATION/blahp-${package_version}* $extra_repos
 # Install batch systems that will exercise the blahp in osg-test
 yum install -y osg-ce-condor \
     munge \
+    globus-proxy-utils \
     slurm \
     slurm-slurmd \
     slurm-slurmctld \
