@@ -30,11 +30,6 @@ cp /etc/condor/config.d/99-local.conf /etc/condor-ce/config.d/99-local.conf
 # Reduce the trace timeouts
 export _condor_CONDOR_CE_TRACE_ATTEMPTS=60
 
-# Enable PBS/Slurm BLAH debugging
-mkdir /var/tmp/{qstat,slurm}_cache_vdttest/
-touch /var/tmp/qstat_cache_vdttest/pbs_status.debug
-touch /var/tmp/slurm_cache_vdttest/slurm_status.debug
-
 # Ok, do actual testing
 set +e # don't exit immediately if osg-test fails
 echo "------------ OSG Test --------------"
