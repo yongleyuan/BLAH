@@ -15,9 +15,12 @@ RPM_LOCATION=/tmp/rpmbuild/RPMS/x86_64
 package_version=`grep Version blahp/rpm/blahp.spec | awk '{print $2}'`
 yum localinstall -y $RPM_LOCATION/blahp-${package_version}* $extra_repos
 
-# Install batch systems that will exercise the blahp in osg-test
-yum install -y https://repo.opensciencegrid.org/osg/3.5/osg-3.5-el${OS_VERSION}-release-latest.rpm
+# Make sure OSG repos are around so we can get the OSG metapackages
+# (osg-test may (?) need the OSG configuration)
+[[ $BUILD_ENV == "osg" ]] || \
+    yum install -y https://repo.opensciencegrid.org/osg/3.5/osg-3.5-el${OS_VERSION}-release-latest.rpm
 
+# Install batch systems that will exercise the blahp in osg-test
 yum install -y osg-ce-condor \
     munge \
     globus-proxy-utils \
