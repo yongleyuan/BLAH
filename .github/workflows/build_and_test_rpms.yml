@@ -76,13 +76,13 @@ jobs:
         if: failure() && steps.integration-tests.outcome == 'failure'
         run: |
           docker exec $GITHUB_SHA \
-                 /bin/bash -c "cat /var/log/condor-ce/*"
+                 /bin/bash -c "find /var/log/condor-ce -type f -exec cat {} \;"
 
       - name: HTCondor logs
         if: failure() && steps.integration-tests.outcome == 'failure'
         run: |
           docker exec $GITHUB_SHA \
-                 /bin/bash -c "cat /var/log/condor/*"
+                 /bin/bash -c "find /var/log/condor -type f -exec cat {} \;"
 
       - name: BLAHP PBS status cache logs
         if: failure() && steps.integration-tests.outcome == 'failure'
