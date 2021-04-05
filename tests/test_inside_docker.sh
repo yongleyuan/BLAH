@@ -3,6 +3,10 @@
 OS_VERSION=$1
 BUILD_ENV=$2
 
+# Pre-create vdttest user so that we can create the BLAHP status cache
+# debugging logs
+useradd -m vdttest
+
 # Source repo version
 git clone https://github.com/opensciencegrid/osg-test.git
 pushd osg-test
@@ -34,11 +38,12 @@ export _condor_CONDOR_CE_TRACE_ATTEMPTS=60
 mkdir /var/tmp/{qstat,slurm}_cache_vdttest/
 touch /var/tmp/qstat_cache_vdttest/pbs_status.debug
 touch /var/tmp/slurm_cache_vdttest/slurm_status.debug
+chown -R vdttest: /var/tmp/*_cache_vdttest/
 
 # Ok, do actual testing
 set +e # don't exit immediately if osg-test fails
 echo "------------ OSG Test --------------"
-osg-test -mvad --hostcert --no-cleanup
+osg-test -mvd --hostcert --no-cleanup
 test_exit=$?
 set -e
 

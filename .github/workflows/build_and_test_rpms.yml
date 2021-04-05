@@ -83,6 +83,18 @@ jobs:
           docker exec $GITHUB_SHA \
                  /bin/bash -c "cat /var/log/condor/*"
 
+      - name: BLAHP PBS status cache logs
+        if: failure() && steps.integration-tests.outcome == 'failure'
+        run: |
+          docker exec $GITHUB_SHA \
+                 /bin/bash -c "cat /var/tmp/qstat_status_vdttest/pbs_status.log"
+
+      - name: BLAHP Slurm status cache logs
+        if: failure() && steps.integration-tests.outcome == 'failure'
+        run: |
+          docker exec $GITHUB_SHA \
+                 /bin/bash -c "cat /var/tmp/slurm_status_vdttest/slurm_status.log"
+
       - name: Verify preun/postun RPM sections
         run: |
           docker exec $GITHUB_SHA \
