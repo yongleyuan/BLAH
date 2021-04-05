@@ -2,7 +2,8 @@
 
 set -ex
 
-BUILD_ENV=$1
+OS_VERSION=$1
+BUILD_ENV=$2
 
 # After building the RPM, try to install it
 # Fix the lock file error on EL7.  /var/lock is a symlink to /var/run/lock
@@ -15,6 +16,8 @@ package_version=`grep Version blahp/rpm/blahp.spec | awk '{print $2}'`
 yum localinstall -y $RPM_LOCATION/blahp-${package_version}* $extra_repos
 
 # Install batch systems that will exercise the blahp in osg-test
+yum install -y https://repo.opensciencegrid.org/osg/3.5/osg-3.5-el${OS_VERSION}-release-latest.rpm
+
 yum install -y osg-ce-condor \
     munge \
     globus-proxy-utils \

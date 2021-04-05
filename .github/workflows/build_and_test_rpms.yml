@@ -42,6 +42,7 @@ jobs:
           docker exec $GITHUB_SHA \
                  /bin/bash -xc \
                    "/blahp/tests/install_rpms.sh \
+                     ${{ matrix.dver }} \
                      ${{ matrix.target_env}}"
 
       - name: Run ${{ matrix.target_env }} integration tests (EL${{ matrix.dver }})
