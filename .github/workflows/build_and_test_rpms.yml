@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         dver: [7]
-        target_env: [osg]
+        target_env: [uw_build]
     steps:
       - uses: actions/checkout@v2
         with:
