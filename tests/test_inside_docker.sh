@@ -32,7 +32,7 @@ EOF
 cp /etc/condor/config.d/99-local.conf /etc/condor-ce/config.d/99-local.conf
 
 # Reduce the trace timeouts
-export _condor_CONDOR_CE_TRACE_ATTEMPTS=60
+export _condor_CONDOR_CE_TRACE_ATTEMPTS=120
 
 # Enable PBS/Slurm BLAH debugging
 mkdir /var/tmp/{qstat,slurm}_cache_vdttest/
