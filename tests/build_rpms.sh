@@ -72,9 +72,6 @@ yum -y install \
     python3 \
     python3-rpm
 
-# Prepare the RPM environment
-mkdir -p /tmp/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-
 if [[ $BUILD_ENV == uw_build ]]; then
     printf "%s\n" "%dist .el${OS_VERSION}" >> /etc/rpm/macros.dist
 else
@@ -82,6 +79,7 @@ else
 fi
 printf "%s\n" "%${BUILD_ENV} 1" >> /etc/rpm/macros.dist
 
+mkdir -p /tmp/rpmbuild/{SOURCES,SPECS}
 cp blahp/rpm/blahp.spec /tmp/rpmbuild/SPECS
 package_version=`grep Version blahp/rpm/blahp.spec | awk '{print $2}'`
 pushd blahp
