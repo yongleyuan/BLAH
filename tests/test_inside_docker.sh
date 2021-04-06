@@ -41,10 +41,5 @@ touch /var/tmp/slurm_cache_vdttest/slurm_status.debug
 chown -R vdttest: /var/tmp/*_cache_vdttest/
 
 # Ok, do actual testing
-set +e # don't exit immediately if osg-test fails
 echo "------------ OSG Test --------------"
 osg-test -mvd --hostcert --no-cleanup
-test_exit=$?
-set -e
-
-exit $test_exit
