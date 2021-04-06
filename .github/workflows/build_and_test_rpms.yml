@@ -32,7 +32,7 @@ jobs:
       - name: Build EL${{ matrix.dver }} RPMs (${{ matrix.target_env }})
         run: |
           docker exec $GITHUB_SHA \
-                 /bin/bash -xc \
+                 /bin/bash -c \
                    "/blahp/tests/build_rpms.sh \
                      ${{ matrix.dver }} \
                      ${{ matrix.target_env}}"
@@ -40,7 +40,7 @@ jobs:
       - name: Install EL${{ matrix.dver }} RPMs (${{ matrix.target_env }})
         run: |
           docker exec $GITHUB_SHA \
-                 /bin/bash -xc \
+                 /bin/bash -c \
                    "/blahp/tests/install_rpms.sh \
                      ${{ matrix.dver }} \
                      ${{ matrix.target_env}}"
@@ -49,7 +49,7 @@ jobs:
         id: integration-tests
         run: |
           docker exec $GITHUB_SHA \
-                 /bin/bash -xc \
+                 /bin/bash -c \
                    "/blahp/tests/test_inside_docker.sh \
                      ${{ matrix.dver}} \
                      ${{ matrix.target_env}}"
