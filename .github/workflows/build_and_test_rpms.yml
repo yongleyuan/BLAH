@@ -25,7 +25,7 @@ jobs:
                  --hostname "blahp-ci.htcondor.org" \
                  --name $GITHUB_SHA \
                  --volume /sys/fs/cgroup:/sys/fs/cgroup \
-                 --volume `pwd`:/blahp:rw \
+                 --volume "$PWD":/blahp:rw \
                  centos:centos${{ matrix.dver }} \
                  /usr/sbin/init
 
@@ -100,4 +100,3 @@ jobs:
         run: |
           docker exec $GITHUB_SHA \
                  yum remove -y 'blahp'
-
