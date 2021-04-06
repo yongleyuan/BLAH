@@ -1,4 +1,6 @@
-#!/bin/sh -xe
+#!/bin/sh
+
+set -xe
 
 OS_VERSION=$1
 BUILD_ENV=$2
