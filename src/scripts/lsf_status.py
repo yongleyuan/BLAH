@@ -4,7 +4,24 @@
 #
 #  Author:   George Papadimitriou
 #  e-mail:   georgpap@isi.edu
+#  Author:   Brian Bockelman
+#  e-mail:   bbockelm@cse.unl.edu
 #
+#
+# Copyright (c) University of Nebraska-Lincoln.  2012
+# Copyright (c) University of Wisconsin-Madison.  2012
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
 """
@@ -13,6 +30,8 @@ Query LSF for the status of a given job
 Internally, it creates a cache of the LSF bjobs response and will reuse this
 for subsequent queries.
 """
+
+from __future__ import print_function
 
 import os
 import re
@@ -26,8 +45,12 @@ import struct
 import subprocess
 import signal
 import tempfile
+import traceback
 import pickle
 import csv
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import blah
 
 cache_timeout = 60
 
@@ -38,7 +61,17 @@ def log(msg):
     A very lightweight log - not meant to be used in production, but helps
     when debugging scale tests
     """
-    print >> sys.stderr, time.strftime("%x %X"), os.getpid(), msg
+    print(time.strftime("%x %X"), os.getpid(), msg, file=sys.stderr)
+
+def to_str(strlike, encoding="latin-1", errors="strict"):
+    """Turns a bytes into a str or leaves it alone.
+    The default encoding is latin-1 (which will not raise
+    a UnicodeDecodeError); best to use when you want to treat the data
+    as arbitrary bytes, but some function is expecting a str.
+    """
+    if isinstance(strlike, bytes):
+        return strlike.decode(encoding, errors)
+    return strlike
 
 def createCacheDir():
     uid = os.geteuid()
@@ -46,8 +79,8 @@ def createCacheDir():
     cache_dir = os.path.join("/var/tmp", "bjobs_cache_%s" % username)
 
     try:
-        os.mkdir(cache_dir, 0755)
-    except OSError, oe:
+        os.mkdir(cache_dir, 0o755)
+    except OSError as oe:
         if oe.errno != errno.EEXIST:
             raise
         s = os.stat(cache_dir)
@@ -102,7 +135,7 @@ def ExclusiveLock(fd, timeout=120):
         try:
             fcntl.lockf(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             return
-        except IOError, ie:
+        except IOError as ie:
             if not ((ie.errno == errno.EACCES) or (ie.errno == errno.EAGAIN)):
                 raise
             if check_lock(fd, timeout):
@@ -115,7 +148,7 @@ def ExclusiveLock(fd, timeout=120):
                 try:
                     fcntl.lockf(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                     return
-                except IOError, ie:
+                except IOError as ie:
                     if not ((ie.errno == errno.EACCES) or (ie.errno == errno.EAGAIN)):
                         raise
         sleeptime = random.random()
@@ -187,7 +220,7 @@ def get_lock_pid(fd):
         else:
             arg = struct.pack(linux_struct_flock, fcntl.F_WRLCK, 0, 0, 0, 0)
         result = fcntl.fcntl(fd, fcntl.F_GETLK, arg)
-    except IOError, ie:
+    except IOError as ie:
         if ie.errno != errno.EINVAL:
             raise
         log("Unable to determine which PID has the lock due to a " \
@@ -216,6 +249,7 @@ def bjobs(jobid=""):
     command = (bjobs, '-V')
     bjobs_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     bjobs_version, _ = bjobs_process.communicate()
+    bjobs_version = to_str(bjobs_version)
     log(bjobs_version)
 
     starttime = time.time()
@@ -227,6 +261,8 @@ def bjobs(jobid=""):
         bjobs_process = subprocess.Popen(("%s -UF -a" % bjobs), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, shell=True)
 
     bjobs_process_stdout, bjobs_process_stderr = bjobs_process.communicate()
+    bjobs_process_stdout = to_str(bjobs_process_stdout)
+    bjobs_process_stderr = to_str(bjobs_process_stderr)
 
     if bjobs_process_stderr is "":
         result = parse_bjobs_fd(bjobs_process_stdout.splitlines())
@@ -308,6 +344,7 @@ def get_finished_job_stats(jobid):
         log("Querying bjobs for completed job for jobid: %s" % (str(jobid)))
         bhist_process = subprocess.Popen(("bhist -UF %s" % str(jobid)), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, shell=True)
         bhist_process_stdout, _ = bhist_process.communicate()
+        bhist_process_stdout = to_str(bhist_process_stdout)
 
         for line in bhist_process_stdout.splitlines():
             line = line.strip()
@@ -335,7 +372,7 @@ def get_finished_job_stats(jobid):
                     factor = 1024**4
                 elif mem_unit[0] == 'E':
                     factor = 1024**5
-                return_dict["ImageSize"] = int(m.group(1)) * factor
+                return_dict["ImageSize"] = int(float(m.group(1))) * factor
 
     return return_dict
 
@@ -354,6 +391,7 @@ def get_bjobs_location():
         cmd = 'which bjobs'
     child_stdout = os.popen(cmd)
     output = child_stdout.read()
+    output = to_str(output)
     location = output.split("\n")[0].strip()
     if child_stdout.close():
         raise Exception("Unable to determine bjobs location: %s" % output)
@@ -429,7 +467,7 @@ def fill_cache(cache_location):
         try:
             for key, val in results.items():
                 key = key.split(".")[0]
-                writer.writerow([key, pickle.dumps(val)])
+                writer.writerow([key, pickle.dumps(val).hex()])
             os.fsync(fd)
         except:
             os.unlink(filename)
@@ -461,7 +499,7 @@ def cache_to_status(jobid, fd):
     reader = csv.reader(fd, delimiter='\t')
     for row in reader:
         if row[0] == jobid:
-            return pickle.loads(row[1])
+            return pickle.loads(bytes.fromhex(row[1]))
 
 def check_cache(jobid, recurse=True):
     uid = os.geteuid()
@@ -470,17 +508,17 @@ def check_cache(jobid, recurse=True):
     if recurse:
         try:
             s = os.stat(cache_dir)
-        except OSError, oe:
+        except OSError as oe:
             if oe.errno != 2:
                 raise
-            os.mkdir(cache_dir, 0755)
+            os.mkdir(cache_dir, 0o755)
             s = os.stat(cache_dir)
         if s.st_uid != uid:
             raise Exception("Unable to check cache because it is owned by UID %d" % s.st_uid)
     cache_location = os.path.join(cache_dir, "blahp_results_cache")
     try:
-        fd = open(cache_location, "a+")
-    except IOError, ie:
+        fd = open(cache_location, "r+")
+    except IOError as ie:
         if ie.errno != 2:
             raise
         # Create an empty file so we can hold the file lock
@@ -520,27 +558,27 @@ def main():
     elif len(sys.argv) == 3 and sys.argv[1] == "-w":
         jobid_arg = sys.argv[2]
     else:
-        print "1Usage: lsf_status.sh lsf/<date>/<jobid>"
+        print("1Usage: lsf_status.sh lsf/<date>/<jobid>")
         return 1
     jobid = jobid_arg.split("/")[-1].split(".")[0]
     log("Checking cache for jobid %s" % jobid)
     cache_contents = None
     try:
         cache_contents = check_cache(jobid)
-    except Exception, e:
+    except Exception as e:
         msg = "1ERROR: Internal exception, %s" % str(e)
         log(msg)
-        print msg
+        #print msg
     if not cache_contents:
         log("Jobid %s not in cache; querying LSF" % jobid)
         results = bjobs(jobid)
         log("Finished querying LSF for jobid %s" % jobid)
         if not results or jobid not in results:
             log("1ERROR: Unable to find job %s" % jobid)
-            print "1ERROR: Unable to find job %s" % jobid
+            print(f"1ERROR: Unable to find job {jobid}")
         else:
             log("0%s" % job_dict_to_string(results[jobid]))
-            print "0%s" % job_dict_to_string(results[jobid])
+            print(f"0{job_dict_to_string(results[jobid])}")
     else:
         log("Jobid %s in cache." % jobid)
         log("0%s" % job_dict_to_string(cache_contents))
@@ -549,7 +587,7 @@ def main():
             finished_job_stats = get_finished_job_stats(jobid)
             cache_contents.update(finished_job_stats)
 
-        print "0%s" % job_dict_to_string(cache_contents)
+        print(f"0{job_dict_to_string(cache_contents)}")
     return 0
 
 if __name__ == "__main__":
@@ -557,6 +595,10 @@ if __name__ == "__main__":
         sys.exit(main())
     except SystemExit:
         raise
-    except Exception, e:
-        print "1ERROR: %s" % str(e).replace("\n", "\\n")
+    except Exception as e:
+        exc_traceback = sys.exc_info()[2]
+        tb = traceback.extract_tb(exc_traceback)
+        log(traceback.format_exc())
+        print("1ERROR: {0}: {1} (file {2}, line {3})".format(e.__class__.__name__, str(e).replace("\n", "\\n"),
+                                                             tb[-1].filename, tb[-1].lineno))
         sys.exit(0)

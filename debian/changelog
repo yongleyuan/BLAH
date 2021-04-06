@@ -1,0 +1,19 @@
+blahp (2.0.0-1) stable; urgency=medium
+
+  * Add GPU support (#12)
+  * Improve multi-node support for Slurm (HTCONDOR-166)
+  * More efficient status queries for Slurm (HTCONDOR-104)
+  * More robust job ID extraction from SLurm (HTCONDOR-259)
+  * Better interfacing with PBS and Slurm
+  * More Python 3 fixes for PBS and Slurm scripts
+  * Convert LSF script to Python 3 (HTCONDOR-333, #34)
+  * Add Debian build files
+
+ -- Brian Lin <blin@cs.wisc.edu>  Tue, 30 Mar 2021 13:35:00 -0600
+
+
+blahp (1.18.48-2) stable; urgency=medium
+
+  * Initial release.
+
+ -- Tim Theisen <tim@cs.wisc.edu>  Thu, 12 Nov 2020 16:09:04 -0600
