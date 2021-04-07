@@ -28,8 +28,6 @@ Internally, it creates a cache of the PBS qstat response and will reuse this
 for subsequent queries.
 """
 
-from __future__ import print_function
-
 import os
 import re
 import pwd
@@ -58,7 +56,7 @@ def log(msg):
     A very lightweight log - not meant to be used in production, but helps
     when debugging scale tests
     """
-    print(time.strftime("%x %X"), os.getpid(), msg, file = sys.stderr)
+    print(time.strftime("%x %X"), os.getpid(), msg, file=sys.stderr)
 
 def createCacheDir():
     uid = os.geteuid()

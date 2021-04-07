@@ -3,6 +3,9 @@
 %define bl_sysconfdir %{_sysconfdir}/%{name}
 %define bl_libexecdir %{_libexecdir}/%{name}
 
+# Force brp-python-bytecompile to use Python 3
+%global __python /usr/bin/python3
+
 Name:		blahp
 Version:	2.0.0
 Release:	1%{?gitrev:.%{gitrev}}%{?dist}

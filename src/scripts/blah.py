@@ -1,11 +1,7 @@
 """Common functions for BLAH python scripts"""
 
-try:  # for Python 2
-    from ConfigParser import RawConfigParser
-    from StringIO import StringIO
-except ImportError:  # for Python 3
-    from configparser import RawConfigParser
-    from io import StringIO
+from configparser import RawConfigParser
+from io import StringIO
 
 class BlahConfigParser(RawConfigParser, object):
 
