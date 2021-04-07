@@ -61,6 +61,7 @@ mv blahp/* $RPM_BUILD_ROOT%{bl_libexecdir}/
 install -m 0755 -d -p $RPM_BUILD_ROOT%{_sysconfdir}
 mv $RPM_BUILD_ROOT%{_sysconfdir}/blah.config.template $RPM_BUILD_ROOT%{_sysconfdir}/blah.config
 mv $RPM_BUILD_ROOT%{_sysconfdir}/blparser.conf.template $RPM_BUILD_ROOT%{_sysconfdir}/blparser.conf
+echo "blah_libexec_directory=/usr/libexec/blahp" >> $RPM_BUILD_ROOT%{_sysconfdir}/blah.config
 
 # Insert appropriate templates for LSF, SGE, Slurm, and HTCondor; admins will need to change these
 install -m 0755 -d -p $RPM_BUILD_ROOT%{bl_sysconfdir}
