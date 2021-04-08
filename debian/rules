@@ -21,6 +21,7 @@ override_dh_auto_install:
 	mv blahp debian/blahp/usr/libexec
 	mv debian/blahp/etc/blah.config.template debian/blahp/etc/blah.config
 	mv debian/blahp/etc/blparser.conf.template debian/blahp/etc/blparser.conf
+	echo "blah_libexec_directory=/usr/libexec/blahp" >> debian/blahp/etc/blah.config
 	mkdir --mode 0755 debian/blahp/etc/blahp
 	for batch_system in pbs sge slurm lsf condor; do \
 		mv debian/blahp/usr/libexec/blahp/$${batch_system}_local_submit_attributes.sh debian/blahp/etc/blahp/; \
