@@ -1,3 +1,10 @@
+blahp (2.0.1-1) stable; urgency=medium
+
+  * Convert to pure Python 3 (no Python 2 compatibility)
+  * Restore blah_libexec_directory to the blah.config file
+
+ -- Tim Theisen <tim@cs.wisc.edu>  Thu, 08 Apr 2021 15:06:13 -0600
+
 blahp (2.0.0-1) stable; urgency=medium
 
   * Add GPU support (#12)
@@ -9,8 +16,7 @@ blahp (2.0.0-1) stable; urgency=medium
   * Convert LSF script to Python 3 (HTCONDOR-333, #34)
   * Add Debian build files
 
- -- Brian Lin <blin@cs.wisc.edu>  Tue, 30 Mar 2021 13:35:00 -0600
-
+ -- Brian Lin <blin@cs.wisc.edu>  Tue, 30 Mar 2021 13:35:00 -0500
 
 blahp (1.18.48-2) stable; urgency=medium
 

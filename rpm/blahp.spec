@@ -7,7 +7,7 @@
 %global __python /usr/bin/python3
 
 Name:		blahp
-Version:	2.0.0
+Version:	2.0.1
 Release:	1%{?gitrev:.%{gitrev}}%{?dist}
 Summary:	gLite BLAHP daemon
 
@@ -108,6 +108,10 @@ fi
 %{_initrddir}/glite-ce-*
 
 %changelog
+* Thu Apr 08 2021 Tim Theisen <tim@cs.wisc.edu> 2.0.1-1
+- Convert to pure Python 3 (no Python 2 compatibility)
+- Restore blah_libexec_directory to the blah.config file
+
 * Tue Mar 30 2021 Brian Lin <blin@cs.wisc.edu> 2.0.0-1
 - Add GPU support (#12)
 - Improve multi-node support for Slurm (HTCONDOR-166)
