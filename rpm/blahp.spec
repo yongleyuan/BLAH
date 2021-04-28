@@ -7,7 +7,7 @@
 %global __python /usr/bin/python3
 
 Name:		blahp
-Version:	2.0.1
+Version:	2.0.2
 Release:	1%{?gitrev:.%{gitrev}}%{?dist}
 Summary:	gLite BLAHP daemon
 
@@ -108,6 +108,9 @@ fi
 %{_initrddir}/glite-ce-*
 
 %changelog
+* Wed Apr 28 2021 Tim Theisen <tim@cs.wisc.edu> 2.0.2-1
+- Fix periodic remove expression, otherwise jobs go on hold
+
 * Thu Apr 08 2021 Tim Theisen <tim@cs.wisc.edu> 2.0.1-1
 - Convert to pure Python 3 (no Python 2 compatibility)
 - Restore blah_libexec_directory to the blah.config file
