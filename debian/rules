@@ -25,7 +25,7 @@ override_dh_auto_install:
 	mkdir --mode 0755 debian/blahp/etc/blahp
 	for batch_system in pbs sge slurm lsf condor; do \
 		mv debian/blahp/usr/libexec/blahp/$${batch_system}_local_submit_attributes.sh debian/blahp/etc/blahp/; \
-		ln -s ../../../etc/blahp/$${batch_system}_local_submit_attributes.sh \
+		ln -s /etc/blahp/$${batch_system}_local_submit_attributes.sh \
 			debian/blahp/usr/libexec/blahp/$${batch_system}_local_submit_attributes.sh; \
 		done
 		mv debian/blahp/usr/share/doc/glite-ce-blahp-@PVER@ debian/blahp/usr/share/doc/blahp

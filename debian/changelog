@@ -1,9 +1,15 @@
+blahp (2.0.2-1) stable; urgency=medium
+
+  * Fix periodic remove expression, otherwise jobs go on hold
+
+ -- Tim Theisen <tim@cs.wisc.edu>  Wed, 28 Apr 2021 07:35:11 -0500
+
 blahp (2.0.1-1) stable; urgency=medium
 
   * Convert to pure Python 3 (no Python 2 compatibility)
   * Restore blah_libexec_directory to the blah.config file
 
- -- Tim Theisen <tim@cs.wisc.edu>  Thu, 08 Apr 2021 15:06:13 -0600
+ -- Tim Theisen <tim@cs.wisc.edu>  Thu, 08 Apr 2021 15:06:13 -0500
 
 blahp (2.0.0-1) stable; urgency=medium
 
