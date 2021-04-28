@@ -192,7 +192,7 @@ fi
 
 if [ "x$bls_opt_runtime" != "x" ]
 then
-  echo "periodic_remove = JobStatus == 2 && time() - JobCurrentStartExecutingDate > $bls_opt_runtime" >> $submit_file
+  echo "periodic_remove = JobStatus == 2 && (time() - JobCurrentStartExecutingDate > $bls_opt_runtime) =?= true" >> $submit_file
 fi
 
 cat >> $submit_file << EOF
