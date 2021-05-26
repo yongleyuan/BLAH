@@ -1775,22 +1775,18 @@ wrap_up:
 }
 
 int
-get_status_and_old_proxy(int use_glexec, char *jobDescr, const char *proxyFileName,
+get_status_and_old_proxy(int map_mode, char *jobDescr, const char *proxyFileName,
 			char **status_argv, char **old_proxy,
 			char **workernode, char **error_string)
 {
-	char *proxy_link;
 	char *r_old_proxy=NULL;
-	int readlink_res, retcod;
+	int retcod;
 	classad_context status_ad[MAX_JOB_NUMBER];
 	char errstr[MAX_JOB_NUMBER][ERROR_MAX_LEN];
 	int jobNumber=0, jobStatus;
-	char *command, *escaped_command;
-	char error_buffer[ERROR_MAX_LEN];
-	job_registry_split_id *spid;
 	job_registry_entry *ren;
 	int i;
-	exec_cmd_t exe_command = EXEC_CMD_DEFAULT;
+	const char *proxy_ext = NULL;
 
 	if (old_proxy == NULL) return(-1);
 	*old_proxy = NULL;
@@ -1826,131 +1822,36 @@ get_status_and_old_proxy(int use_glexec, char *jobDescr, const char *proxyFileNa
 	/* FIXMEPRREG: the job proxy and status can be removed once */
 	/* FIXMEPRREG: the job registry is used throughout. */
 
-	spid = job_registry_split_blah_id(jobDescr);
-	if (spid == NULL) return(-1); /* Error */
+	switch (map_mode) {
+	case MEXEC_GLEXEC:
+		proxy_ext = ".glexec";
+		break;
+	case MEXEC_SUDO:
+		proxy_ext = ".mapped";
+		break;
+	case MEXEC_NO_MAPPING:
+	default:
+		proxy_ext = ".lmt";
+	}
 
-	if (!use_glexec)
+	if ((r_old_proxy = make_message("%s%s", proxyFileName, proxy_ext)) == NULL)
 	{
-		if ((r_old_proxy = (char *)malloc(FILENAME_MAX)) == NULL)
+		fprintf(stderr, "Out of memory.\n");
+		exit(MALLOC_ERROR);
+	}
+	if (access(r_old_proxy, R_OK) == -1)
+	{
+		r_old_proxy[strlen(proxyFileName)] = '\0';
+		if (access(r_old_proxy, R_OK) == -1)
 		{
-			fprintf(stderr, "Out of memory.\n");
-			exit(MALLOC_ERROR);
-		}
-		if ((proxy_link = make_message("%s/.blah_jobproxy_dir/%s.proxy", getenv("HOME"), spid->proxy_id)) == NULL)
-	 	{
-			fprintf(stderr, "Out of memory.\n");
-			exit(MALLOC_ERROR);
-		}
-		if ((readlink_res = readlink(proxy_link, r_old_proxy, FILENAME_MAX - 2)) == -1)
-		{
-			if (error_string != NULL)
-			{
-				error_buffer[0] = '\000';
-				strerror_r(errno, error_buffer, sizeof(error_buffer));
-				*error_string = escape_spaces(error_buffer);
-			}
-			/* Proxy link for renewal is not accessible */
-			/* Try with .norenew */
-			free(proxy_link);
-			if ((proxy_link = make_message("%s/.blah_jobproxy_dir/%s.proxy.norenew", getenv("HOME"), spid->proxy_id)) == NULL)
-	 		{
-				fprintf(stderr, "Out of memory.\n");
-				exit(MALLOC_ERROR);
-			}
-			if ((readlink_res = readlink(proxy_link, r_old_proxy, FILENAME_MAX - 2)) >= 0)
-			{
-				/* No need to check for job status - */
-				/* Proxy has to be renewed locally */
-				r_old_proxy[readlink_res] = '\000'; /* readlink does not append final NULL */
-				*old_proxy = r_old_proxy;
-				free(proxy_link);
-				job_registry_free_split_id(spid);
-				return 1; /* 'local' state */
-			}
-			// Look for the limited proxy next to the new proxy - this is a common case for HTCondor-based submission.
-			free(proxy_link);
-			if ((proxy_link = make_message("%s.lmt", proxyFileName)) == NULL)
-			{
-				fprintf(stderr, "Out of memory.\n");
-				exit(MALLOC_ERROR);
-			}
-			if (access(proxy_link, R_OK) == 0)
-			{
-				*old_proxy = proxy_link;
-				// do not free proxy_link in this case.
-				free(r_old_proxy);
-				job_registry_free_split_id(spid);
-				return 1;
-			}
-			free(proxy_link);
 			free(r_old_proxy);
-			job_registry_free_split_id(spid);
-			return -1; /* Error */
+			return -1;
 		}
-		r_old_proxy[readlink_res] = '\000'; /* readlink does not append final NULL */
-		*old_proxy = r_old_proxy;
-		free(proxy_link);
-
 	}
-	else
-	{
-		/* GLEXEC case */
-		exe_command.delegation_type = atoi(status_argv[MEXEC_PARAM_DELEGTYPE]);
-		exe_command.delegation_cred = status_argv[MEXEC_PARAM_DELEGCRED];
-		exe_command.command = make_message("/usr/bin/readlink -n .blah_jobproxy_dir/%s.proxy", spid->proxy_id);
-		if (exe_command.command == NULL)
-	 	{
-			fprintf(stderr, "Out of memory.\n");
-			exit(MALLOC_ERROR);
-		}
-		retcod = execute_cmd(&exe_command);
-		r_old_proxy = strdup(exe_command.output);
-		if (r_old_proxy == NULL || strlen(r_old_proxy) == 0 || retcod != 0 || exe_command.exit_code != 0)
-		{
-			if (r_old_proxy != NULL)
-			{
-				free(r_old_proxy);
-				r_old_proxy = NULL;
-			}
+	*old_proxy = r_old_proxy;
 
-			if (error_string != NULL)
-			{
-				escaped_command = escape_spaces(command);
-				*error_string = make_message("%s\\ returns\\ %d\\ and\\ no\\ proxy.", escaped_command, retcod);
-				if (BLAH_DYN_ALLOCATED(escaped_command)) free(escaped_command);
-			}
-
-			/* Proxy link for renewal is not accessible */
-			/* Try with .norenew */
-			recycle_cmd(&exe_command);
-			exe_command.append_to_command = ".norenew";
-			retcod = execute_cmd(&exe_command);
-			r_old_proxy = strdup(exe_command.output);
-			if (r_old_proxy != NULL && strlen(r_old_proxy) > 0 && retcod == 0)
-			{
-				/* No need to check for job status - */
-				/* Proxy has to be renewed locally */
-				*old_proxy = r_old_proxy;
-				free(exe_command.command);
-				cleanup_cmd(&exe_command);
-				job_registry_free_split_id(spid);
-				return 1; /* 'local' state */
-			}
-			if (r_old_proxy != NULL) free(r_old_proxy);
-			free(exe_command.command);
-			cleanup_cmd(&exe_command);
-			job_registry_free_split_id(spid);
-			return(-1);
-		}
-		*old_proxy = r_old_proxy;
-		free(exe_command.command);
-		cleanup_cmd(&exe_command);
-	}
-
-	job_registry_free_split_id(spid);
-
-	/* If we have a proxy link, and proxy renewal on worker nodes */
-	/* was disabled, we need to deal with the proxy locally. */
+	/* If we have a proxy, and proxy renewal on worker nodes was */
+	/* disabled, we only need to deal with the proxy locally. */
 	/* We don't need to spend time checking on job status. */
 	if (disable_wn_proxy_renewal) return 1; /* 'Local' renewal only. */
 
@@ -1992,13 +1893,15 @@ cmd_renew_proxy(void *args)
 	int i, jobStatus, retcod, count;
 	char *error_string = NULL;
 	char *proxyFileNameNew = NULL;
-	int use_glexec, use_mapping;
+	int use_glexec = 0;
+	int use_mapping = 0;
 	exec_cmd_t exe_command = EXEC_CMD_DEFAULT;
 	char *limited_proxy_name = NULL;
 
-	use_mapping = (argv[CMD_RENEW_PROXY_ARGS + 1] != NULL);
-	use_glexec = ( use_mapping &&
-                       (atoi(argv[CMD_RENEW_PROXY_ARGS + 1 + MEXEC_PARAM_DELEGTYPE ]) == MEXEC_GLEXEC) );
+	if (argv[CMD_RENEW_PROXY_ARGS + 1] != NULL) {
+		use_mapping = atoi(argv[CMD_RENEW_PROXY_ARGS + 1 + MEXEC_PARAM_DELEGTYPE ]);
+		use_glexec = use_mapping == MEXEC_GLEXEC;
+	}
 
 	if (blah_children_count>0) check_on_children(blah_children, blah_children_count);
 

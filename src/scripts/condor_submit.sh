@@ -278,14 +278,4 @@ fi
 # Clean temporary files -- There only temp file is the one we submit
 rm -f $submit_file
 
-# Create a softlink to proxy file for proxy renewal - local renewal 
-# of limited proxy only.
-
-if [ "x$job_registry" == "x" ]; then
-    if [ -r "$bls_opt_proxy_string" -a -f "$bls_opt_proxy_string" ] ; then
-        [ -d "$bls_proxy_dir" ] || mkdir "$bls_proxy_dir"
-        ln -s "$bls_opt_proxy_string" "$bls_proxy_dir/$jobID.proxy.norenew"
-    fi
-fi
-
 exit $return_code

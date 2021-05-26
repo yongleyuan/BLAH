@@ -117,7 +117,6 @@ if [ "x$getcreamport" == "xyes" ] ; then
  exit $retcode
 fi
 
-proxy_dir=~/.blah_jobproxy_dir
 pars=$*
 
 for  reqfull in $pars ; do
@@ -185,10 +184,6 @@ END {
 		print "ExitCode=" exitcode ";"
 	}
 	print "]"
-	if (jobstatus == 3 || jobstatus == 4) {
-		system("rm " proxyDir "/" jobId ".proxy 2>/dev/null")
-	}
-
 }
 '
 `
@@ -268,7 +263,7 @@ END {
 
 job_data=`grep "$requested" $logs`
 
-result=`echo "$job_data" | awk -v jobId=$requested -v proxyDir=$proxy_dir '
+result=`echo "$job_data" | awk -v jobId=$requested '
 BEGIN {
 	rex_queued   = "\"JOB_NEW\" \"[0-9\.]+\" [0-9]+ " jobId
 	rex_running  = "\"JOB_START\" \"[0-9\.]+\" [0-9]+ " jobId
@@ -356,9 +351,6 @@ END {
 		}
 	}
 	print "]"
-	if (jobstatus == 3 || jobstatus == 4) {
-		system("rm " proxyDir "/" jobId ".proxy 2>/dev/null")
-	}
 }
 ' `
 
@@ -371,12 +363,8 @@ END {
 
 	if [ "x$usedBLParser" == "xyes" ] ; then
 
-    		pr_removal=`echo $result | sed -e 's/^.*\///'`
 		result=`echo $result | sed 's/\/.*//'`
     		echo "0"$result
-		if [ "x$pr_removal" == "xYes" ] ; then
-        		rm -f ${proxy_dir}/${requested}.proxy 2>/dev/null
-    		fi
 		usedBLParser="no"	
 	fi
 	logs=""

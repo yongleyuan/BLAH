@@ -843,6 +843,10 @@ LookupAndSend(int m_sock)
 			}else{
 				t_wnode=make_message("WorkerNode=%s;",j2wn[id]);
 			}
+			/* This proxy removal message is now ignored by the
+			 * lsf_status.sh script, since we no longer make symlinks in
+			 * ~/.blah_jobproxy_dir.
+			 */
 			if(j2js[id] && ((strcmp(j2js[id],"3")==0) || (strcmp(j2js[id],"4")==0))){
 				pr_removal="Yes";
 			} else {
@@ -887,6 +891,10 @@ LookupAndSend(int m_sock)
 				}else{
 					t_wnode=make_message("WorkerNode=%s;",j2wn[id]);
 				}
+				/* This proxy removal message is now ignored by the
+				 * lsf_status.sh script, since we no longer make symlinks in
+				 * ~/.blah_jobproxy_dir.
+				 */
 				if(j2js[id] && ((strcmp(j2js[id],"3")==0) || (strcmp(j2js[id],"4")==0))){
 					pr_removal="Yes";
 				} else {
