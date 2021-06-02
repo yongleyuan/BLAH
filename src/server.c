@@ -84,8 +84,10 @@
 #include <fcntl.h>
 #include <signal.h>
 
+#if defined(HAVE_GLOBUS)
 #include "globus_gsi_credential.h"
 #include "globus_gsi_proxy.h"
+#endif
 
 #include "blahpd.h"
 #include "config.h"
@@ -2168,11 +2170,13 @@ cmd_send_proxy_to_worker_node(void *args)
 		else
 			proxyFileNameNew = strdup(argv[CMD_SEND_PROXY_TO_WORKER_NODE_ARGS + MEXEC_PARAM_SRCPROXY + 1]);
 
+#if defined(HAVE_GLOBUS)
 		/* Add the globus library path */
 		ld_path = make_message("LD_LIBRARY_PATH=%s/lib",
 		                           getenv("GLOBUS_LOCATION") ? getenv("GLOBUS_LOCATION") : "/opt/globus");
 		push_env(&exe_command.environment, ld_path);
 		free(ld_path);
+#endif
 
 		delegate_switch = "";
 		if (config_test_boolean(config_get("blah_delegate_renewed_proxies",blah_config_handle)))
@@ -2640,6 +2644,10 @@ const char *grid_proxy_errmsg = NULL;
 
 int activate_globus()
 {
+#if !defined(HAVE_GLOBUS)
+	grid_proxy_errmsg = "Globus support disabled";
+	return -1;
+#else
 	static int active = 0;
 
 	if (active) {
@@ -2663,6 +2671,7 @@ int activate_globus()
 
 	active = 1;
 	return 0;
+#endif
 }
 
 /* Returns lifetime left on proxy, in seconds.
@@ -2671,6 +2680,10 @@ int activate_globus()
  */
 int grid_proxy_info(const char *proxy_filename)
 {
+#if !defined(HAVE_GLOBUS)
+	grid_proxy_errmsg = "Globus support disabled";
+	return -1;
+#else
 	globus_gsi_cred_handle_t handle = NULL;
 	time_t time_left = -1;
 
@@ -2704,6 +2717,7 @@ int grid_proxy_info(const char *proxy_filename)
 	}
 
 	return time_left;
+#endif
 }
 
 /* Writes new proxy derived from existing one. Argument lifetime is the
@@ -2714,6 +2728,10 @@ int grid_proxy_info(const char *proxy_filename)
 int grid_proxy_init(const char *src_filename, char *dst_filename,
 					int lifetime)
 {
+#if !defined(HAVE_GLOBUS)
+	grid_proxy_errmsg = "Globus support disabled";
+	return -1;
+#else
 	globus_gsi_cred_handle_t src_handle = NULL;
 	globus_gsi_cred_handle_t dst_handle = NULL;
 	globus_gsi_proxy_handle_t dst_proxy_handle = NULL;
@@ -2788,6 +2806,7 @@ int grid_proxy_init(const char *src_filename, char *dst_filename,
 	}
 
 	return rc;
+#endif
 }
 
 static char *
@@ -2803,6 +2822,13 @@ limit_proxy(char* proxy_name, char *limited_proxy_name, char **error_message)
 	struct flock plock;
 	FILE *fpr;
 	char *limited_proxy_made_up_name=NULL;
+
+#if !defined(HAVE_GLOBUS)
+	if (error_message) {
+		*error_message = strdup("Globus support disabled");
+	}
+	return NULL;
+#endif
 
 	if (limited_proxy_name == NULL)
 	{
