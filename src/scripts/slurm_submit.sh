@@ -32,6 +32,8 @@
 slurm_std_storage=${slurm_std_storage:-/dev/null}
 slurm_binpath=${slurm_binpath:-/usr/bin}
 
+bls_submit_args_prefix="#SBATCH"
+
 bls_parse_submit_options "$@"
 
 bls_setup_all_files

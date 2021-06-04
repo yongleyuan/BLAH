@@ -47,6 +47,8 @@
 
 . `dirname $0`/blah_common_submit_functions.sh
 
+bls_submit_args_prefix="#BSUB"
+
 conffile=$lsf_confpath/lsf.conf
 
 lsf_base_path=`cat $conffile|grep LSB_SHAREDIR| awk -F"=" '{ print $2 }'`

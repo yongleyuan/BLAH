@@ -842,7 +842,11 @@ function bls_set_up_local_and_extra_args ()
   fi
   
   if [ ! -z "$bls_opt_xtra_args" ] ; then
-      echo -e $bls_opt_xtra_args >> $bls_tmp_file 2> /dev/null
+      prefix=
+      if echo "$bls_opt_xtra_args" | grep -q -v "^$bls_submit_args_prefix" ; then
+          prefix="$bls_submit_args_prefix "
+      fi
+      echo -e ${prefix}${bls_opt_xtra_args} >> $bls_tmp_file 2> /dev/null
   fi
 }
 

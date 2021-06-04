@@ -36,6 +36,8 @@
 
 . `dirname $0`/blah_common_submit_functions.sh
 
+bls_submit_args_prefix='#$'
+
 if [ -z "$sge_rootpath" ]; then sge_rootpath="/usr/local/sge/pro"; fi
 if [ -r "$sge_rootpath/${sge_cellname:-default}/common/settings.sh" ]
 then
