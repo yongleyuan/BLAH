@@ -48,7 +48,7 @@ if [[ $BUILD_ENV == osg ]]; then
     yum install -y https://repo.opensciencegrid.org/osg/3.5/osg-3.5-el${OS_VERSION}-release-latest.rpm
     yum-config-manager --enable osg-upcoming-development  # make sure to grab 8.9.13
 else
-    yum install -y https://research.cs.wisc.edu/htcondor/repo/8.9/el${OS_VERSION}/release/htcondor-release-8.9-1.el${OS_VERSION}.noarch.rpm
+    yum install -y https://research.cs.wisc.edu/htcondor/repo/current/htcondor-release-current.el${OS_VERSION}.noarch.rpm
 fi
 
 # Install packages required for the build
