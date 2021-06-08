@@ -31,20 +31,23 @@
 #    limitations under the License.
 #
 
-INCLUDES = -I. $(CLASSAD_CFLAGS) \
+if HAVE_GLOBUS
+GLOBUS_CFLAGS = -DHAVE_GLOBUS
            $(GLOBUS_GSI_CRED_CFLAGS) \
            $(GLOBUS_GSI_PROXY_CFLAGS) \
            $(GLOBUS_GSI_UTILS_CFLAGS) \
            $(GLOBUS_GSS_ASSIST_CFLAGS) \
            $(GLOBUS_GSI_SYSCFG_CFLAGS) 
-
-SUBDIRS = scripts
-
-if HAVE_GLOBUS
 GLOBUS_EXECS = BPRclient BPRserver
 else
+GLOBUB_CFLAGS =
 GLOBUS_EXECS =
 endif
+
+INCLUDES = -I. $(CLASSAD_CFLAGS) \
+           $(GLOBUS_CFLAGS)
+
+SUBDIRS = scripts
 
 sbin_PROGRAMS = blahpd_daemon blah_job_registry_add blah_job_registry_lkup blah_job_registry_scan_by_subject blah_check_config blah_job_registry_dump blah_job_registry_purge
 bin_PROGRAMS = blahpd
