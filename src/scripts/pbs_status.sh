@@ -163,7 +163,6 @@ if [ "x$getcreamport" == "xyes" ] ; then
 fi
 
 pars=$*
-proxy_dir=~/.blah_jobproxy_dir
 
 for  reqfull in $pars ; do
 	requested=""
@@ -228,9 +227,6 @@ END {
 		print "ExitCode=" exitcode ";"
 	}
 	print "]"
-	if (jobstatus == 3 || jobstatus == 4) {
-		system("rm " proxyDir "/" jobId ".proxy 2>/dev/null")
-	}
 
 }
 '
@@ -278,7 +274,7 @@ END {
 		usedBLParser="no"
 		logs="$logpath/$logfile `find $logpath -type f -newer $logpath/$logfile`"
 		log_data=`grep "$reqjob" $logs`
-		result=`echo "$log_data" | awk -v jobId="$reqjob" -v wn="$workernode" -v proxyDir="$proxy_dir" '
+		result=`echo "$log_data" | awk -v jobId="$reqjob" -v wn="$workernode" '
 BEGIN {
 	rex_queued   = jobId ";Job Queued "
 	rex_running  = jobId ";Job Run "
@@ -335,9 +331,6 @@ END {
 		print "ExitCode = " exitcode ";"
 	}
 	print "]"
-	if (jobstatus == 3 || jobstatus == 4) {
-		system("rm " proxyDir "/" jobId ".proxy 2>/dev/null")
-	}
 }
 ' `
 
@@ -350,7 +343,6 @@ END {
   		fi
 	fi #close if on pbs_BLParser
         if [ "x$usedBLParser" == "xyes" ] ; then
-                pr_removal=`echo $result | sed -e 's/^.*\///'`
                 result=`echo $result | sed 's/\/.*//'`
 
 		resstatus=`echo $result|sed "s/\[.*JobStatus=\([^;]*\).*/\1/"`;
@@ -370,9 +362,6 @@ END {
                         echo "0"$result "Workernode=\"$workernode\";]"
                 fi
 
-                if [ "x$pr_removal" == "xYes" ] ; then
-                        rm -f ${proxy_dir}/${reqjob}.proxy 2>/dev/null
-                fi
                 usedBLParser="no"
         fi
      fi #close of if-else on $pbs_nologaccess

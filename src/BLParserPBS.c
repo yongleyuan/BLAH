@@ -1000,6 +1000,10 @@ LookupAndSend(int m_sock)
 		pthread_mutex_lock(&write_mutex);
 		if(id>0 && j2js[id]!=NULL){
  		 
+			/* This proxy removal message is now ignored by the
+			 * lsf_status.sh script, since we no longer make symlinks in
+			 * ~/.blah_jobproxy_dir.
+			 */
 			if(j2js[id] && ((strcmp(j2js[id],"3")==0) || (strcmp(j2js[id],"4")==0))){
 				pr_removal="Yes";
 			} else {
@@ -1030,6 +1034,10 @@ LookupAndSend(int m_sock)
 					sysfatal("can't malloc out_buf in LookupAndSend: %r");
 				}
 	  
+				/* This proxy removal message is now ignored by the
+				 * lsf_status.sh script, since we no longer make symlinks in
+				 * ~/.blah_jobproxy_dir.
+				 */
 				if(j2js[id] && ((strcmp(j2js[id],"3")==0) || (strcmp(j2js[id],"4")==0))){
 					pr_removal="Yes";
 				} else {

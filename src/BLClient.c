@@ -217,6 +217,10 @@ main(int argc, char *argv[])
     
 		fgets(buffer, MAX_LINE-1, stdin);
 
+		/* The pbs/lsf_status.sh script now ignores the proxy removal
+		 * message after the '/', since we no longer make symlinks in
+		 * ~/.blah_jobproxy_dir.
+		 */
 		if(strstr(buffer,"/")==NULL){
 			if ((cp = strrchr (buffer, '\n')) != NULL){
 				*cp = '\0';

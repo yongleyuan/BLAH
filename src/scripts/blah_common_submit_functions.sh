@@ -283,8 +283,6 @@ function bls_parse_submit_options ()
       bls_opt_proxyrenew="no"
   fi
   
-  bls_proxy_dir=~/.blah_jobproxy_dir
-  
   bls_opt_workdir=$PWD
 
   #default values for polling interval and min proxy lifetime
@@ -518,7 +516,6 @@ function bls_setup_all_files ()
   if [ "x$bls_opt_stgproxy" == "xyes" ] ; then
       bls_proxy_local_file=${bls_opt_workdir}"/"`basename "$bls_opt_proxy_string"`;
       [ -r "$bls_proxy_local_file" -a -f "$bls_proxy_local_file" ] || bls_proxy_local_file="$bls_opt_proxy_string"
-      [ -r "$bls_proxy_local_file" -a -f "$bls_proxy_local_file" ] || bls_proxy_local_file=/tmp/x509up_u`id -u`
       if [ -r "$bls_proxy_local_file" -a -f "$bls_proxy_local_file" ] ; then
           bls_proxy_remote_file=${bls_tmp_name}.proxy
           bls_test_shared_dir "$bls_proxy_local_file"
@@ -888,12 +885,4 @@ function bls_wrap_up_submit ()
   cd $bls_opt_temp_dir
   # DEBUG: cp $bls_tmp_file /tmp
   rm -f $bls_tmp_file
-  
-  if [ "x$job_registry" == "x" ]; then
-    # Create a softlink to proxy file for proxy renewal
-    if [ -r "$bls_proxy_local_file" -a -f "$bls_proxy_local_file" ] ; then
-        [ -d "$bls_proxy_dir" ] || mkdir $bls_proxy_dir
-        ln -s $bls_proxy_local_file $bls_proxy_dir/$jobID.proxy
-    fi
-  fi
 }

@@ -48,7 +48,6 @@ done
 shift `expr $OPTIND - 1`
 
 pars=$*
-proxy_dir=~/.blah_jobproxy_dir
 
 for  reqfull in $pars ; do
   reqjob=`echo $reqfull | sed -e 's/^.*\///'`
@@ -63,7 +62,7 @@ for  reqfull in $pars ; do
 
   result=`${slurm_binpath}/scontrol $cluster_arg show job $reqjob 2>$staterr`
   stat_exit_code=$?
-  result=`echo "$result" | awk -v job_id=$reqjob -v proxy_dir=$proxy_dir '
+  result=`echo "$result" | awk -v job_id=$reqjob '
 BEGIN {
     blah_status = 4
     slurm_status = ""
@@ -101,9 +100,6 @@ END {
         print "ExitCode=" exit_code ";"
     }
     print "]\n"
-    if ( blah_status == 3 || blah_status == 4 ) {
-        #system( "rm " proxy_dir "/" job_id ".proxy 2>/dev/null" )
-    }
 }
 '
 `

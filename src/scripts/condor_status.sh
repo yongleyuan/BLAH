@@ -22,8 +22,6 @@
 # limitations under the License.
 #
 
-proxy_dir=~/.blah_jobproxy_dir
-
 . `dirname $0`/blah_load_config.sh
 
 if [ "x$job_registry" != "x" ] ; then
@@ -195,11 +193,6 @@ function make_ad {
     local remote_wall_clock_time=$(echo $line | awk -F ',' '{print $7}')
     local exit_by_signal=$(echo $line | awk -F ',' '{print $8}')
     local code_or_signal=$(echo $line | awk -F ',' '{print $9}')
-
-    # Clean up proxy renewal links if applicable
-    if [ "$status" == "3" -o "$status" == "4" ]; then
-        /bin/rm -f $proxy_dir/$job.proxy.norenew 2>/dev/null
-    fi
 
     echo -n "[BatchjobId=\"$job\";JobStatus=$status;RemoteSysCpu=${remote_sys_cpu:-0};RemoteUserCpu=${remote_user_cpu:-0};BytesSent=${bytes_sent:-0};BytesRecvd=${bytes_recvd:-0};RemoteWallClockTime=${remote_wall_clock_time:-0};"
     if [ "$status" == "4" ] ; then
