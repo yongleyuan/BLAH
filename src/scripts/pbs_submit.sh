@@ -44,6 +44,8 @@
 
 . `dirname $0`/blah_common_submit_functions.sh
 
+bls_submit_args_prefix="#PBS"
+
 logpath=${pbs_spoolpath}/server_logs
 if [ ! -d $logpath -o ! -x $logpath ]; then
   if [ -x "${pbs_binpath}/tracejob" ]; then
