@@ -69,12 +69,12 @@ echo "blah_libexec_directory=/usr/libexec/blahp" >> $RPM_BUILD_ROOT%{_sysconfdir
 # Insert appropriate templates for LSF, SGE, Slurm, and HTCondor; admins will need to change these
 install -m 0755 -d -p $RPM_BUILD_ROOT%{bl_sysconfdir}
 
-for batch_system in pbs sge slurm lsf condor; do
+for batch_system in condor kubernetes lsf nqs pbs sge slurm; do
     mv $RPM_BUILD_ROOT%{bl_libexecdir}/${batch_system}_local_submit_attributes.sh $RPM_BUILD_ROOT%{bl_sysconfdir}/
 done
 
 # Create local_submit_attributes.sh symlinks in /etc/blahp
-for batch_system in pbs sge slurm lsf condor; do
+for batch_system in condor kubernetes lsf nqs pbs sge slurm; do
     ln -s %{bl_sysconfdir}/${batch_system}_local_submit_attributes.sh \
        $RPM_BUILD_ROOT%{bl_libexecdir}/${batch_system}_local_submit_attributes.sh
 done
