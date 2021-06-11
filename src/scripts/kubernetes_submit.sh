@@ -36,8 +36,6 @@ usage_string="Usage: $0 -c <command> [-i <stdin>] [-o <stdout>] [-e <stderr>] [-
 
 workdir=$PWD
 
-proxy_dir=~/.blah_jobproxy_dir
-
 ###############################################################
 # Parse parameters
 ###############################################################
