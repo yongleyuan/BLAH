@@ -42,6 +42,10 @@ libexec_SCRIPTS = blah_load_config.sh blah_common_submit_functions.sh \
   condor_local_submit_attributes.sh \
   pbs_local_submit_attributes.sh \
   lsf_local_submit_attributes.sh \
+  kubernetes_cancel.sh kubernetes_status.sh kubernetes_submit.sh kubernetes_hold.sh kubernetes_resume.sh \
+  kubernetes_local_submit_attributes.sh \
+  nqs_cancel.sh nqs_status.sh nqs_submit.sh nqs_hold.sh nqs_resume.sh \
+  nqs_local_submit_attributes.sh \
   blah.py __init__.py \
   pbs_status.py \
   slurm_status.py
