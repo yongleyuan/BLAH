@@ -7,8 +7,8 @@
 %global __python /usr/bin/python3
 
 Name:		blahp
-Version:	2.0.2
-Release:	1%{?gitrev:.%{gitrev}}%{?dist}
+Version:	2.1.0
+Release:	0.rc1%{?gitrev:.%{gitrev}}%{?dist}
 Summary:	gLite BLAHP daemon
 
 Group:		System/Libraries
