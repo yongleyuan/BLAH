@@ -609,6 +609,8 @@ function bls_setup_all_files ()
           if [ ! -z $xfile  ] ; then
               if [ ! -z "$bls_opt_outputflstringremap" ] ; then
                   read xfileremap <&6
+              else
+                  xfileremap=""
               fi
 
               if [ -z $xfileremap ] ; then
