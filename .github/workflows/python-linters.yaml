@@ -38,7 +38,7 @@ jobs:
         pip --cache-dir ~/pip-cache install pylint
     - name: Run Pylint
       env:
-        PYTHONPATH: $PYTHONPATH:$PWD/src/htcondorce
+        PYTHONPATH: $PYTHONPATH:$PWD/src/scripts
         PYTHON_FILES: ${{ needs.python-files.outputs.filelist }}
       run: |
         pylint --errors-only $PYTHON_FILES
