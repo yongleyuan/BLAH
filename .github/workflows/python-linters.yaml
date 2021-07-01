@@ -11,7 +11,8 @@ jobs:
 
     - id: python-files
       run: |
-        echo "::set-output name=filelist::$(find . -type f -exec awk '/^#!.*python/ {print FILENAME} {nextfile}' {} +)"
+        find /home/user -type f -printf "%f\n"
+        echo "::set-output name=filelist::$(find . -type f -exec awk ' /^#!.*python/{print FILENAME} {nextfile}' {} +)"
 
   pylint:
     runs-on: ubuntu-latest
