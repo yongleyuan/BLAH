@@ -12,7 +12,7 @@ jobs:
     - id: python-files
       run: |
         echo "::set-output name=file_list::$(find . -type f -exec awk ' /^#!.*python/{print FILENAME} {nextfile}' {} +)"
-        echo "FILELIST: $filelist"
+        echo "FILELIST: ${{ steps.python-files.outputs.file_list }}"
 
   pylint:
     runs-on: ubuntu-latest
