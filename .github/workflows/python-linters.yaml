@@ -41,6 +41,7 @@ jobs:
         PYTHONPATH: $PYTHONPATH:$PWD/src/scripts
         PYTHON_FILES: ${{ needs.python-files.outputs.filelist }}
       run: |
+        echo $PYTHONPATH
         pylint --errors-only $PYTHON_FILES
   flake8:
     runs-on: ubuntu-latest
@@ -71,4 +72,3 @@ jobs:
         PYTHON_FILES: ${{ needs.python-files.outputs.filelist }}
       run: |
         flake8 --select F $PYTHON_FILES
-        echo $PYTHONPATH
