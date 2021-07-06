@@ -36,12 +36,15 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip --cache-dir ~/pip-cache install pylint
+    - name: Set Python Path
+      run: |
+        echo "PYTHONPATH=$PYTHONPATH:$PWD/src/scripts" >> $GITHUB_ENV
     - name: Run Pylint
       env:
-        PYTHONPATH: $PYTHONPATH:$PWD/src/scripts
+        # PYTHONPATH: $PYTHONPATH:$PWD/src/scripts
         PYTHON_FILES: ${{ needs.python-files.outputs.filelist }}
       run: |
-        echo $PYTHONPATH
+        echo ${{ env.PYTHONPATH }}
         pylint --errors-only $PYTHON_FILES
   flake8:
     runs-on: ubuntu-latest
