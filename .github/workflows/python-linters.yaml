@@ -8,12 +8,11 @@ jobs:
     outputs:
       filelist: ${{ steps.python-files.outputs.filelist }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v1
     - id: python-files
       run: |
-        pwd
-        ls -al
-        echo "::set-output name=filelist::$(find . -type f -exec awk ' /^#!.*python/{print FILENAME} {nextfile}' {} +)"
+        echo "::set-output name=filelist::$(find . -type f -exec awk ' /^#!.*python/{print FILENAME} {nextfile}' {} + | tr '\n' ' ')"
+        echo "filelist: $filelist"
 
   pylint:
     runs-on: ubuntu-latest
@@ -69,7 +68,7 @@ jobs:
         pip --cache-dir ~/pip-cache install flake8
     - name: Run flake8
       env:
-        PYTHONPATH: $PYTHONPATH:$PWD/src/htcondorce
+        PYTHONPATH: $PYTHONPATH:$PWD/src/BLAH
         PYTHON_FILES: ${{ needs.python-files.outputs.filelist }}
       run: |
         flake8 --select F $PYTHON_FILES
