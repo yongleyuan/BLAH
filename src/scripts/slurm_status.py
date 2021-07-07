@@ -259,7 +259,7 @@ def call_squeue(jobid="", cluster=""):
         raise Exception("squeue failed with exit code %s" % str(squeue_proc.returncode))
 
     # If the job has completed...
-    if jobid is not "" and jobid in result and "JobStatus" in result[jobid] and (result[jobid]["JobStatus"] == '4' or result[jobid]["JobStatus"] == '3'):
+    if jobid != "" and jobid in result and "JobStatus" in result[jobid] and (result[jobid]["JobStatus"] == '4' or result[jobid]["JobStatus"] == '3'):
         # Get the finished job stats and update the result
         finished_job_stats = get_finished_job_stats(jobid, cluster)
         result[jobid].update(finished_job_stats)
@@ -339,20 +339,20 @@ def get_finished_job_stats(jobid, cluster):
     # Slurm can return more than 1 row, for some odd reason.
     # so sum up relevant values
     for row in reader:
-        if row["UserCPU"] is not "":
+        if row["UserCPU"] != "":
             try:
                 return_dict['RemoteUserCpu'] += convert_cpu_to_seconds(row["UserCPU"])
             except:
                 log("Failed to parse CPU usage for job id %s: %s" % (jobid, row["UserCPU"]))
                 raise
 
-        if row["SystemCPU"] is not "":
+        if row["SystemCPU"] != "":
             try:
                 return_dict['RemoteSysCpu'] += convert_cpu_to_seconds(row["SystemCPU"])
             except:
                 log("Failed to parse CPU usage for job id %s: %s" % (jobid, row["SystemCPU"]))
                 raise   
-        if row["MaxRSS"] is not "":
+        if row["MaxRSS"] != "":
             # Remove the trailing [KMGTP] and scale the value appropriately
             # Note: We assume that all values will have a suffix, and we
             #   want the value in kilos.
@@ -377,7 +377,7 @@ def get_finished_job_stats(jobid, cluster):
             except:
                 log("Failed to parse memory usage for job id %s: %s" % (jobid, row["MaxRSS"]))
                 raise
-        if row["ExitCode"] is not "":
+        if row["ExitCode"] != "":
             try:
                 return_dict["ExitCode"] = int(row["ExitCode"].split(":")[0])
             except:
