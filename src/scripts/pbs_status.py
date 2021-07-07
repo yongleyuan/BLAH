@@ -257,7 +257,7 @@ def qstat(jobid=""):
         raise Exception("qstat failed with exit code %s" % str(qstat_proc.returncode))
 
     # If the job has completed...
-    if jobid is not "" and "JobStatus" in result[jobid] and (result[jobid]["JobStatus"] == '4' or result[jobid]["JobStatus"] == '3'):
+    if jobid != "" and "JobStatus" in result[jobid] and (result[jobid]["JobStatus"] == '4' or result[jobid]["JobStatus"] == '3'):
         # Get the finished job stats and update the result
         finished_job_stats = get_finished_job_stats(jobid)
         result[jobid].update(finished_job_stats)
@@ -340,13 +340,13 @@ def get_finished_job_stats(jobid):
         # Slurm can return more than 1 row, for some odd reason.
         # so sum up relevant values
         for row in reader:
-            if row["AveCPU"] is not "":
+            if row["AveCPU"] != "":
                 try:
                     return_dict['RemoteUserCpu'] += convert_cpu_to_seconds(row["AveCPU"]) * int(row["AllocCPUS"])
                 except:
                     log("Failed to parse CPU usage for job id %s: %s, %s" % (jobid, row["AveCPU"], row["AllocCPUS"]))
                     raise
-            if row["MaxRSS"] is not "":
+            if row["MaxRSS"] != "":
                 # Remove the trailing [KMGTP] and scale the value appropriately
                 # Note: We assume that all values will have a suffix, and we
                 #   want the value in kilos.
@@ -365,7 +365,7 @@ def get_finished_job_stats(jobid):
                 except:
                     log("Failed to parse memory usage for job id %s: %s" % (jobid, row["MaxRSS"]))
                     raise
-            if row["ExitCode"] is not "":
+            if row["ExitCode"] != "":
                 try:
                     return_dict["ExitCode"] = int(row["ExitCode"].split(":")[0])
                 except:
