@@ -48,7 +48,7 @@ import pickle
 import csv
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import blah
+# import blah (not used)
 
 cache_timeout = 60
 
@@ -253,7 +253,7 @@ def bjobs(jobid=""):
     starttime = time.time()
 
     log("Starting bjobs.")
-    if jobid is not "":
+    if jobid != "":
         bjobs_process = subprocess.Popen(("%s -UF %s" % (bjobs, jobid)), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, shell=True)
     else:
         bjobs_process = subprocess.Popen(("%s -UF -a" % bjobs), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, shell=True)
@@ -262,9 +262,9 @@ def bjobs(jobid=""):
     bjobs_process_stdout = to_str(bjobs_process_stdout)
     bjobs_process_stderr = to_str(bjobs_process_stderr)
 
-    if bjobs_process_stderr is "":
+    if bjobs_process_stderr == "":
         result = parse_bjobs_fd(bjobs_process_stdout.splitlines())
-    elif jobid is not "":
+    elif jobid != "":
         result = {jobid: {'BatchJobId': '"%s"' % jobid, 'JobStatus': '3', 'ExitCode': ' 0'}}
     else:
         result = {}
@@ -276,7 +276,7 @@ def bjobs(jobid=""):
         raise Exception("bjobs failed with exit code %s" % str(exit_code))
 
     # If the job has completed...
-    if jobid is not "" and "JobStatus" in result[jobid] and (result[jobid]["JobStatus"] == '4' or result[jobid]["JobStatus"] == '3'):
+    if jobid != "" and "JobStatus" in result[jobid] and (result[jobid]["JobStatus"] == '4' or result[jobid]["JobStatus"] == '3'):
         # Get the finished job stats and update the result
         finished_job_stats = get_finished_job_stats(jobid)
         result[jobid].update(finished_job_stats)
