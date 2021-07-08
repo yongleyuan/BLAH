@@ -48,7 +48,6 @@ import pickle
 import csv
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-# import blah (not used)
 
 cache_timeout = 60
 
